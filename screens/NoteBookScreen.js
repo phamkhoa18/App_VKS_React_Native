@@ -4,7 +4,6 @@ const handleOptionPress = () => {
 import {
   View,
   Text,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   TouchableOpacity,
@@ -17,7 +16,7 @@ import { ChevronRight, BookOpen, Users, FileText, X, ChevronLeft } from 'lucide-
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { FONT_CONFIG } from '../constants/fonts';
-
+import { SafeAreaView } from 'react-native-safe-area-context';
 const { height: screenHeight } = Dimensions.get('window');
 
 export default function NoteBookScreen() {

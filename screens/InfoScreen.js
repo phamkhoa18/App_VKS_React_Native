@@ -3,8 +3,7 @@ import {
   View, 
   Text, 
   ScrollView, 
-  TouchableOpacity, 
-  SafeAreaView, 
+  TouchableOpacity,  
   StatusBar,
   Animated,
   Dimensions,
@@ -37,6 +36,7 @@ import {
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('window');
 
