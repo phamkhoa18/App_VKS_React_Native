@@ -1,6 +1,5 @@
-// services/GoogleTTSService.js
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 
 class GoogleTTSService {
   constructor(apiKey) {
@@ -11,6 +10,7 @@ class GoogleTTSService {
     this.onPlaybackStatusUpdate = null;
   }
 
+  // --- Gọi API Google Cloud Text-to-Speech ---
   async synthesizeText(text, options = {}) {
     const {
       languageCode = 'vi-VN',
@@ -24,16 +24,10 @@ class GoogleTTSService {
     try {
       const response = await fetch(`${this.baseUrl}?key=${this.apiKey}`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           input: { text },
-          voice: {
-            languageCode,
-            name: voiceName,
-            ssmlGender
-          },
+          voice: { languageCode, name: voiceName, ssmlGender },
           audioConfig: {
             audioEncoding: 'MP3',
             speakingRate,
@@ -41,14 +35,23 @@ class GoogleTTSService {
             volumeGainDb,
             effectsProfileId: ['headphone-class-device']
           }
-        })
+        }),
       });
 
       const data = await response.json();
-      
+
       if (data.error) {
         throw new Error(data.error.message);
       }
+
+      if (!data.audioContent) {
+        throw new Error('No audioContent returned from Google TTS API');
+      }
+
+      console.log('Google TTS response:', {
+        audioContentLength: data.audioContent.length,
+        preview: data.audioContent.substring(0, 50)
+      });
 
       return data.audioContent;
     } catch (error) {
@@ -57,22 +60,23 @@ class GoogleTTSService {
     }
   }
 
+  // --- Phát audio từ chuỗi base64 ---
   async playAudio(base64Audio, callbacks = {}) {
     try {
       await this.stopAudio();
 
-      // Save base64 audio to temporary file
-      const audioUri = await this.saveBase64ToFile(base64Audio);
+      if (!base64Audio) {
+        throw new Error('base64Audio is undefined or empty');
+      }
 
-      // Load and play audio
+      console.log('Base64 audio length:', base64Audio.length);
+
+      const audioUri = await this.saveBase64ToFile(base64Audio);
+      console.log('Audio file saved at:', audioUri);
+
       const { sound } = await Audio.Sound.createAsync(
         { uri: audioUri },
-        { 
-          shouldPlay: true,
-          volume: 1.0,
-          isLooping: false,
-          progressUpdateIntervalMillis: 100
-        }
+        { shouldPlay: true, volume: 1.0, isLooping: false, progressUpdateIntervalMillis: 100 }
       );
 
       this.currentSound = sound;
@@ -82,32 +86,38 @@ class GoogleTTSService {
         if (this.onPlaybackStatusUpdate) {
           this.onPlaybackStatusUpdate(status);
         }
-        
+
         if (status.didJustFinish) {
           this.isPlaying = false;
           if (callbacks.onComplete) callbacks.onComplete();
-          // Clean up temp file
           this.cleanupTempFile(audioUri);
         }
       });
 
       if (callbacks.onStart) callbacks.onStart();
-
     } catch (error) {
       console.error('Play audio error:', error);
       if (callbacks.onError) callbacks.onError(error);
+      throw error;
     }
   }
 
+  // --- Fix lỗi base64: encoding='base64' ---
   async saveBase64ToFile(base64Audio) {
     const fileName = `tts_audio_${Date.now()}.mp3`;
     const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
-    
-    await FileSystem.writeAsStringAsync(fileUri, base64Audio, {
-      encoding: FileSystem.EncodingType.Base64,
-    });
-    
-    return fileUri;
+
+    try {
+      await FileSystem.writeAsStringAsync(fileUri, base64Audio, {
+        encoding: 'base64', // ✅ fixed here
+      });
+
+      console.log('File written successfully:', fileUri);
+      return fileUri;
+    } catch (error) {
+      console.error('Error saving base64 to file:', error);
+      throw error;
+    }
   }
 
   async cleanupTempFile(uri) {
@@ -115,6 +125,7 @@ class GoogleTTSService {
       const fileInfo = await FileSystem.getInfoAsync(uri);
       if (fileInfo.exists) {
         await FileSystem.deleteAsync(uri);
+        console.log('Temp file cleaned:', uri);
       }
     } catch (error) {
       console.error('Error cleaning up temp file:', error);
@@ -128,6 +139,7 @@ class GoogleTTSService {
         await this.currentSound.unloadAsync();
         this.currentSound = null;
         this.isPlaying = false;
+        console.log('Audio stopped');
       } catch (error) {
         console.error('Stop audio error:', error);
       }
@@ -138,6 +150,7 @@ class GoogleTTSService {
     if (this.currentSound && this.isPlaying) {
       await this.currentSound.pauseAsync();
       this.isPlaying = false;
+      console.log('Audio paused');
     }
   }
 
@@ -145,9 +158,11 @@ class GoogleTTSService {
     if (this.currentSound && !this.isPlaying) {
       await this.currentSound.playAsync();
       this.isPlaying = true;
+      console.log('Audio resumed');
     }
   }
 
+  // --- Danh sách giọng đọc tiếng Việt ---
   static getVietnameseVoices() {
     return [
       { name: 'vi-VN-Wavenet-A', gender: 'FEMALE', description: 'Giọng nữ tự nhiên' },

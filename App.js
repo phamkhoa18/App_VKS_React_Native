@@ -4,9 +4,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
-import { Home, Bell, User, Search, MessageCircle } from 'lucide-react-native';
+import { Home, Bell, User, Search, MessageCircle, Book } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import "./global.css";
 import { LinearGradient } from 'expo-linear-gradient';
@@ -28,6 +28,7 @@ import UpdateManager from './components/UpdateManager';
 import InfoScreen from './screens/InfoScreen';
 import TopicScreen from './screens/Account/TopicScreen';
 import SettingsScreen from './screens/Account/SettingScreen';
+import NoteBookScreen from './screens/NoteBookScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -59,6 +60,15 @@ function ChatBotStack() {
   );
 }
 
+function NoteBookStack() {
+  return (
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="NoteBookMain" component={NoteBookScreen} />
+      <Stack.Screen name="Info" component={InfoScreen} />
+    </Stack.Navigator>
+  );
+}
+
 function NotificationsStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -68,12 +78,21 @@ function NotificationsStack() {
   );
 }
 
+function BookmarkStack() {
+  return (
+    <Stack.Navigator  screenOptions={{ headerShown: false }}>
+      <Stack.Screen name='BookmarkScreen' component={BookmarkScreen} ></Stack.Screen>
+      <Stack.Screen name="ArticleDetail" component={ArticleDetailScreen} />
+    </Stack.Navigator>
+  )
+}
+
 function ProfileStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="ProfileMain" component={AccountScreen} />
       <Stack.Screen name="Info" component={InfoScreen} />
-      <Stack.Screen name="Bookmark" component={BookmarkScreen} />
+      <Stack.Screen name="Bookmark" component={BookmarkStack} />
       <Stack.Screen name="ProfileEdit" component={ProfileEditScreen} />
       <Stack.Screen name="Topic" component={TopicScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -83,6 +102,8 @@ function ProfileStack() {
 
 function CustomTabBar({ state, descriptors, navigation }) {
   const insets = useSafeAreaInsets();
+  console.log(insets);
+  
   
   const currentRoute = state.routes[state.index];
   const currentScreen = currentRoute.state?.routes?.[currentRoute.state?.index]?.name;
@@ -99,8 +120,8 @@ function CustomTabBar({ state, descriptors, navigation }) {
     <View style={{
       flexDirection: 'row',
       backgroundColor: '#FFFFFF',
-      paddingTop: 10,
-      paddingBottom: 10 + insets.bottom,
+      paddingTop: 15,
+      paddingBottom: (Platform.OS === 'ios' ? 30 : 40) + insets.bottom ,
       paddingHorizontal: 20,
       borderTopLeftRadius: 25,
       borderTopRightRadius: 25,
@@ -113,7 +134,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
       bottom: 0,
       left: 0,
       right: 0,
-      height: 60 + insets.bottom,
+      height: 60,
     }}>
       {state.routes.map((route, index) => {
         const { options } = descriptors[route.key];
@@ -190,10 +211,13 @@ function CustomTabBar({ state, descriptors, navigation }) {
             LucideIcon = Search;
             break;
           case 'Notifications':
-            LucideIcon = Bell;
+            LucideIcon = Book;
             break;
           case 'Profile':
             LucideIcon = User;
+            break;
+          case 'NoteBook':
+            LucideIcon = Book;  // hoặc icon khác
             break;
           default:
             LucideIcon = Home;
@@ -260,7 +284,8 @@ function TabNavigator() {
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Categories" component={CategoriesStack} />
       <Tab.Screen name="ChatBot" component={ChatBotStack} />
-      <Tab.Screen name="Notifications" component={NotificationsStack} />
+      {/* <Tab.Screen name="Notifications" component={NotificationsStack} /> */}
+      <Tab.Screen name='NoteBook' component={NoteBookStack}/>
       <Tab.Screen name="Profile" component={ProfileStack} />
     </Tab.Navigator>
   );

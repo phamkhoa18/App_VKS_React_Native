@@ -32,7 +32,8 @@ import {
   MapPin,
   Briefcase,
   Heart,
-  MessageCircle
+  MessageCircle,
+  ChevronLeft
 } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -190,56 +191,10 @@ export default function ReadingScreen() {
     scrollViewRef.current?.scrollTo({ y: 0, animated: true });
   };
 
-  const toggleTheme = () => {
-    const themes = ['light', 'sepia', 'dark'];
-    const currentIndex = themes.indexOf(currentTheme);
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setCurrentTheme(themes[nextIndex]);
-  };
-
-  const adjustFontSize = () => {
-    const sizes = ['small', 'medium', 'large', 'xlarge'];
-    const currentIndex = sizes.indexOf(fontSize);
-    const nextIndex = (currentIndex + 1) % sizes.length;
-    setFontSize(sizes[nextIndex]);
-  };
-
   const handleBack = () => {
     navigation.goBack();
   };
 
-  const renderFixedHeader = () => (
-    <View style={[
-      styles.header, 
-      { backgroundColor: theme.background }
-    ]}>
-      <View style={styles.headerContent}>
-        {/* Back button - style giống RegisterScreen */}
-        <TouchableOpacity 
-          onPress={handleBack}
-          style={styles.backButton}
-          activeOpacity={0.7}
-        >
-          <ArrowLeft size={20} color={theme.text} />
-        </TouchableOpacity>
-        
-        {/* Header title */}
-        <View style={styles.headerTitleContainer}>
-          <Text style={[
-            styles.headerTitle, 
-            { 
-              color: theme.text,
-              fontFamily: FONT_CONFIG.bold 
-            }
-          ]}>
-            Tin tức
-          </Text>
-        </View>
-      
-      </View>
-
-    </View>
-  );
 
   const renderFloatingControls = () => (
     <View style={styles.floatingControls}>
@@ -405,13 +360,47 @@ export default function ReadingScreen() {
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
+    <SafeAreaView className="flex-1 bg-gray-50">
       <StatusBar 
         barStyle={currentTheme === 'dark' ? 'light-content' : 'dark-content'} 
-        backgroundColor={theme.background}
       />
       
-      {renderFixedHeader()}
+      {/* Header */}
+      <View className="py-4 px-4 bg-white relative">
+        {/* Nút Back */}
+        <TouchableOpacity
+          onPress={() => navigation.goBack()}
+          className="absolute left-4 top-1/2 -translate-y-2 p-2 rounded-full bg-gray-100 z-10"
+          style={{
+            top: '80%',
+            transform: [{ translateY: -12 }],
+          }}
+        >
+          <ChevronLeft size={20} color="#000" />
+        </TouchableOpacity>
+
+        {/* Tiêu đề ở giữa */}
+        <Text
+          className="text-xl font-sf-bold text-black text-center"
+          numberOfLines={1}
+        >
+          Tin tức
+        </Text>
+
+        {/* Bóng đổ */}
+        <View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            backgroundColor: '#000',
+            opacity: 0.1,
+          }}
+        />
+      </View>
+
       
       <ScrollView
         ref={scrollViewRef}
@@ -780,7 +769,6 @@ const styles = StyleSheet.create({
   },
   header: {
     borderBottomWidth: 0.5,
-    paddingTop: 30,
     borderBottomColor: COLORS.neutral[200],
     elevation: 4,
     shadowColor: COLORS.neutral[900],

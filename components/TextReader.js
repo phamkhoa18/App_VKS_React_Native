@@ -1,3 +1,4 @@
+// SimpleGoogleTextReader.js
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   View,
@@ -5,11 +6,11 @@ import {
   TouchableOpacity,
   Image,
   Alert,
-  StyleSheet,
   ActivityIndicator,
+  useWindowDimensions,
+  StyleSheet
 } from 'react-native';
 import Slider from '@react-native-community/slider';
-import { scaleSize, scaleFont, spacing } from '../utils/responsive';
 import GoogleTTSService from '../services/GoogleTTSService';
 import {
   Pause,
@@ -27,10 +28,8 @@ export default function SimpleGoogleTextReader({
   content = '',
   onClose = () => {},
 }) {
-  // Get Google API key from environment
   const googleApiKey = Constants.expoConfig?.extra?.API_GOOGLE_SPEED;
 
-  // State
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -39,18 +38,18 @@ export default function SimpleGoogleTextReader({
   const [isLoading, setIsLoading] = useState(false);
   const [selectedVoice, setSelectedVoice] = useState('vi-VN-Wavenet-A');
   const [audioCache, setAudioCache] = useState(new Map());
+
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   
-  // Refs
   const intervalRef = useRef(null);
   const isSeekingRef = useRef(false);
   const startTimeRef = useRef(0);
   const isMountedRef = useRef(true);
   const googleTTSRef = useRef(null);
 
-  // Initialize Google TTS
   useEffect(() => {
     if (googleApiKey) {
-      console.log('Initializing Google TTS with API key');
       googleTTSRef.current = new GoogleTTSService(googleApiKey);
       googleTTSRef.current.onPlaybackStatusUpdate = (status) => {
         if (status.isLoaded && status.durationMillis) {
@@ -66,7 +65,6 @@ export default function SimpleGoogleTextReader({
     }
   }, [googleApiKey]);
 
-  // Calculate duration
   useEffect(() => {
     if (content && content.length > 0) {
       const wordCount = content.trim().split(/\s+/).length;
@@ -76,7 +74,6 @@ export default function SimpleGoogleTextReader({
     }
   }, [content, speed]);
 
-  // Cleanup
   useEffect(() => {
     isMountedRef.current = true;
     
@@ -90,7 +87,6 @@ export default function SimpleGoogleTextReader({
     };
   }, []);
 
-  // Text chunking for long content
   const chunkText = useCallback((text, maxLength = 4000) => {
     if (text.length <= maxLength) return [text];
     
@@ -114,7 +110,6 @@ export default function SimpleGoogleTextReader({
     return chunks;
   }, []);
 
-  // Play with Google TTS
   const playWithGoogleTTS = useCallback(async (text, startProgress = 0) => {
     if (!googleTTSRef.current) {
       Alert.alert('Lỗi', 'Google TTS không khả dụng');
@@ -123,17 +118,12 @@ export default function SimpleGoogleTextReader({
 
     try {
       setIsLoading(true);
-      
-      // Calculate text to start from
       const startIndex = Math.floor(text.length * startProgress);
       const textToRead = text.slice(startIndex);
-      
-      // Check cache first
       const cacheKey = `${textToRead.substring(0, 100)}-${selectedVoice}-${speed}`;
       let audioContent = audioCache.get(cacheKey);
       
       if (!audioContent) {
-        console.log('Synthesizing with Google TTS...');
         audioContent = await googleTTSRef.current.synthesizeText(textToRead, {
           voiceName: selectedVoice,
           speakingRate: speed,
@@ -141,7 +131,6 @@ export default function SimpleGoogleTextReader({
           volumeGainDb: 2.0
         });
         
-        // Cache the audio
         setAudioCache(prev => new Map(prev).set(cacheKey, audioContent));
         console.log('Audio cached successfully');
       } else {
@@ -170,7 +159,7 @@ export default function SimpleGoogleTextReader({
           if (isMountedRef.current) {
             setIsLoading(false);
             setIsSpeaking(false);
-            Alert.alert('Lỗi', 'Không thể phát âm thanh. Vui lòng thử lại.');
+            Alert.alert('Lỗi', `Không thể phát âm thanh: ${error.message}`);
           }
         }
       });
@@ -186,7 +175,6 @@ export default function SimpleGoogleTextReader({
     }
   }, [selectedVoice, speed, audioCache, duration]);
 
-  // Start speech
   const startSpeech = useCallback(async (startProgress = 0) => {
     if (!content || content.length === 0) {
       Alert.alert('Thông báo', 'Không có nội dung để đọc');
@@ -197,12 +185,9 @@ export default function SimpleGoogleTextReader({
       Alert.alert('Lỗi', 'Không tìm thấy Google API key');
       return;
     }
-
-    console.log(`Starting speech at ${Math.round(startProgress * 100)}%`);
     await playWithGoogleTTS(content, startProgress);
   }, [content, googleApiKey, playWithGoogleTTS]);
 
-  // Stop speech
   const stopSpeech = useCallback(async () => {
     try {
       console.log('Stopping speech');
@@ -219,7 +204,6 @@ export default function SimpleGoogleTextReader({
     }
   }, []);
 
-  // Handle speech complete
   const handleSpeechComplete = useCallback(() => {
     if (!isMountedRef.current) return;
     console.log('Speech completed');
@@ -228,7 +212,6 @@ export default function SimpleGoogleTextReader({
     stopProgressTracking();
   }, []);
 
-  // Progress tracking
   const startProgressTracking = useCallback(() => {
     stopProgressTracking();
     
@@ -242,7 +225,6 @@ export default function SimpleGoogleTextReader({
         const elapsed = Date.now() - startTimeRef.current;
         const newProgress = Math.min(elapsed / duration, 1);
         
-        // Only update if Google TTS is not handling its own progress
         if (!googleTTSRef.current?.isPlaying) {
           setProgress(newProgress);
         }
@@ -261,7 +243,6 @@ export default function SimpleGoogleTextReader({
     }
   }, []);
 
-  // Control handlers
   const toggleSpeech = useCallback(() => {
     if (isSpeaking) {
       stopSpeech();
@@ -274,18 +255,14 @@ export default function SimpleGoogleTextReader({
     }
   }, [isSpeaking, progress, stopSpeech, startSpeech]);
 
-  // Voice selection
   const cycleVoice = useCallback(() => {
     const voices = GoogleTTSService.getVietnameseVoices();
     const currentIndex = voices.findIndex(v => v.name === selectedVoice);
     const nextIndex = (currentIndex + 1) % voices.length;
     setSelectedVoice(voices[nextIndex].name);
     
-    // Clear cache when voice changes
     setAudioCache(new Map());
-    console.log(`Voice changed to: ${voices[nextIndex].description}`);
     
-    // If currently speaking, restart with new voice
     if (isSpeaking) {
       setTimeout(async () => {
         await stopSpeech();
@@ -294,7 +271,6 @@ export default function SimpleGoogleTextReader({
     }
   }, [selectedVoice, isSpeaking, progress, stopSpeech, startSpeech]);
 
-  // Adjust speed
   const adjustSpeed = useCallback(() => {
     const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
     const currentIndex = speedOptions.indexOf(speed);
@@ -302,9 +278,6 @@ export default function SimpleGoogleTextReader({
     const newSpeed = speedOptions[nextIndex];
     
     setSpeed(newSpeed);
-    console.log(`Speed changed to: ${newSpeed}x`);
-    
-    // Clear cache when speed changes
     setAudioCache(new Map());
     
     if (isSpeaking) {
@@ -315,7 +288,6 @@ export default function SimpleGoogleTextReader({
     }
   }, [speed, isSpeaking, progress, stopSpeech, startSpeech]);
 
-  // Utility functions
   const formatTime = useCallback((ms) => {
     const seconds = Math.floor(ms / 1000);
     const mins = Math.floor(seconds / 60);
@@ -343,11 +315,13 @@ export default function SimpleGoogleTextReader({
 
   if (!googleApiKey) {
     return (
-      <View className="bg-red-50 rounded-2xl shadow-lg" style={styles.bottomBar}>
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Không tìm thấy Google API key</Text>
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <X size={scaleSize(20)} color="gray" />
+      <View className="bg-red-50 rounded-2xl shadow-lg mx-8 mb-10 shadow-[#32325D] shadow-opacity-20">
+        <View className="flex-row justify-between items-center px-5 py-5">
+          <Text className="text-red-600 font-medium text-lg">
+            Không tìm thấy Google API key
+          </Text>
+          <TouchableOpacity onPress={onClose} className="ml-2">
+            <X size={28} color="gray" />
           </TouchableOpacity>
         </View>
       </View>
@@ -355,274 +329,184 @@ export default function SimpleGoogleTextReader({
   }
 
   return (
-    <View className="bg-white rounded-2xl shadow-lg" style={styles.bottomBar}>
-      {/* Header */}
-      <View className="flex-row items-center justify-between" style={styles.header}>
-        <View className="flex-row items-center" style={styles.headerLeft}>
-          <TouchableOpacity onPress={toggleSpeech} disabled={isLoading}>
-            <View style={{ position: 'relative' }}>
-              <Image
-                source={require('../assets/icon.png')}
-                style={[styles.appIcon, { opacity: isLoading ? 0.5 : 0.9 }]}
-              />
-              <View style={styles.playOverlay}>
-                {isLoading ? (
-                  <ActivityIndicator size="small" color="white" />
-                ) : isSpeaking ? (
-                  <Pause size={scaleSize(18)} color="white" />
-                ) : (
-                  <Play size={scaleSize(18)} color="white" />
-                )}
-              </View>
-            </View>
-          </TouchableOpacity>
-          <View>
-            <Text className="text-gray-800 font-sf-medium" style={styles.statusText}>
-              {getStatusText()}
-            </Text>
-            <Text className="text-gray-500" style={styles.voiceText}>
-              {getCurrentVoiceName()}
-            </Text>
+    <View
+  className="bg-white rounded-xl shadow-sm mx-auto mb-10"
+  style={[
+    styles.speechCard,
+    {
+      width: isTablet ? 400 : '90%',
+      maxWidth: 400,
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+    },
+  ]}
+>
+  {/* Header */}
+  <View className="flex-row items-center justify-between">
+    <View className="flex-row items-center gap-3">
+      <TouchableOpacity onPress={toggleSpeech} disabled={isLoading} style={{ opacity: isLoading ? 0.5 : 1 }}>
+        <View className="relative">
+          <Image
+            source={require('../assets/icon.png')}
+            className="w-9 h-9 rounded-md"
+          />
+          <View className="absolute inset-0 rounded-md bg-black/30 flex items-center justify-center">
+            {isLoading ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : isSpeaking ? (
+              <Pause size={18} color="white" />
+            ) : (
+              <Play size={18} color="white" />
+            )}
           </View>
         </View>
+      </TouchableOpacity>
 
-        <View className="flex-row items-center" style={styles.headerRight}>
-          {/* Speed Control */}
-          <TouchableOpacity onPress={adjustSpeed} style={styles.speedButton}>
-            <Text className="font-bold text-black" style={styles.speedText}>
-              {speed}x
-            </Text>
-          </TouchableOpacity>
+      <View>
+        <Text style={styles.cardTitle} className="font-sf-medium text-gray-800">
+          {getStatusText()}
+        </Text>
+        <Text style={styles.cardSubtitle} className="text-gray-500 text-xs mt-0.5">
+          {getCurrentVoiceName()}
+        </Text>
+      </View>
+    </View>
 
-          <TouchableOpacity onPress={() => setExpanded(!expanded)} style={styles.expandButton}>
-            {expanded ? (
-              <ChevronDown size={scaleSize(20)} color="gray" />
-            ) : (
-              <ChevronUp size={scaleSize(20)} color="gray" />
-            )}
-          </TouchableOpacity>
+    <View className="flex-row items-center gap-2">
+      <TouchableOpacity
+        onPress={adjustSpeed}
+        className="rounded-md bg-gray-100 px-2 py-1"
+      >
+        <Text style={styles.cardSpeedText} className="font-sf-semibold text-black text-sm">
+          {speed}x
+        </Text>
+      </TouchableOpacity>
 
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <X size={scaleSize(20)} color="gray" />
-          </TouchableOpacity>
-        </View>
+      <TouchableOpacity onPress={() => setExpanded(!expanded)}>
+        {expanded ? (
+          <ChevronDown size={22} color="#6B7280" strokeWidth={2} />
+        ) : (
+          <ChevronUp size={22} color="#6B7280" strokeWidth={2} />
+        )}
+      </TouchableOpacity>
+
+      <TouchableOpacity onPress={onClose}>
+        <X size={22} color="#6B7280" strokeWidth={2} />
+      </TouchableOpacity>
+    </View>
+  </View>
+
+  {/* Expanded Section */}
+  {expanded && (
+    <View className="mt-3">
+      <View className="flex-row items-center justify-between border-b border-gray-100 pb-3 mb-3">
+        <TouchableOpacity onPress={cycleVoice} className="flex-row items-center gap-1.5">
+          <Settings size={16} color="#6B7280" strokeWidth={2} />
+          <Text style={styles.cardActionText} className="text-gray-600 text-sm">
+            Thay đổi giọng
+          </Text>
+        </TouchableOpacity>
+        <Text className="text-gray-500 text-xs">Đã lưu: {audioCache.size} đoạn</Text>
       </View>
 
-      {/* Expanded Controls */}
-      {expanded && (
-        <View style={styles.expandedContainer}>
-          {/* Voice Settings */}
-          <View className="flex-row justify-between items-center" style={styles.voiceSettings}>
-            <TouchableOpacity onPress={cycleVoice} style={styles.voiceButton}>
-              <Settings size={scaleSize(16)} color="gray" />
-              <Text className="text-gray-600" style={styles.voiceButtonText}>
-                Thay đổi giọng
-              </Text>
-            </TouchableOpacity>
-            <Text className="text-gray-500" style={styles.cacheText}>
-              Đã lưu: {audioCache.size} đoạn
-            </Text>
-          </View>
+      <View className="flex-row justify-between items-center mb-3">
+        <TouchableOpacity onPress={() => {
+          stopSpeech();
+          setProgress(0);
+          setTimeout(() => startSpeech(0), 150);
+        }}>
+          <RotateCcw size={22} color="#111827" strokeWidth={2} />
+        </TouchableOpacity>
 
-          {/* Control Buttons */}
-          <View className="flex-row justify-between items-center" style={styles.controlButtons}>
-            <TouchableOpacity onPress={() => {
-              stopSpeech();
-              setProgress(0);
-              setTimeout(() => startSpeech(0), 150);
-            }}>
-              <RotateCcw size={scaleSize(26)} color="black" />
-            </TouchableOpacity>
+        <TouchableOpacity
+          onPress={toggleSpeech}
+          disabled={isLoading}
+          style={{
+            backgroundColor: '#111827',
+            padding: 10,
+            borderRadius: 9999,
+            opacity: isLoading ? 0.6 : 1,
+          }}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="white" />
+          ) : isSpeaking ? (
+            <Pause size={20} color="white" />
+          ) : (
+            <Play size={20} color="white" />
+          )}
+        </TouchableOpacity>
 
-            <TouchableOpacity
-              onPress={toggleSpeech}
-              disabled={isLoading}
-              className="bg-black rounded-full"
-              style={[styles.mainPlayButton, { opacity: isLoading ? 0.5 : 1 }]}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="small" color="white" />
-              ) : isSpeaking ? (
-                <Pause size={scaleSize(22)} color="white" />
-              ) : (
-                <Play size={scaleSize(22)} color="white" />
-              )}
-            </TouchableOpacity>
+        <TouchableOpacity onPress={() => {
+          const newProgress = Math.min(progress + 0.1, 1);
+          stopSpeech();
+          setProgress(newProgress);
+          if (newProgress < 1) setTimeout(() => startSpeech(newProgress), 150);
+        }}>
+          <RotateCw size={22} color="#111827" strokeWidth={2} />
+        </TouchableOpacity>
+      </View>
 
-            <TouchableOpacity onPress={() => {
-              const newProgress = Math.min(progress + 0.1, 1);
-              stopSpeech();
-              setProgress(newProgress);
-              if (newProgress < 1) {
-                setTimeout(() => startSpeech(newProgress), 150);
-              }
-            }}>
-              <RotateCw size={scaleSize(26)} color="black" />
-            </TouchableOpacity>
-          </View>
+      <View className="flex-row justify-between mb-1">
+        <Text className="text-gray-500 text-xs">{formatTime(progress * duration)}</Text>
+        <Text className="text-gray-500 text-xs">{formatTime(duration)}</Text>
+      </View>
 
-          {/* Time Display */}
-          <View className="flex-row justify-between items-center" style={styles.timeContainer}>
-            <Text className="text-gray-500" style={styles.timeText}>
-              {formatTime(progress * duration)}
-            </Text>
-            <Text className="text-gray-500" style={styles.timeText}>
-              {formatTime(duration)}
-            </Text>
-          </View>
+      <Slider
+        style={{ width: '100%', height: 32 }}
+        minimumValue={0}
+        maximumValue={1}
+        value={progress}
+        minimumTrackTintColor="#3B82F6"
+        maximumTrackTintColor="rgba(0,0,0,0.08)"
+        thumbTintColor="#3B82F6"
+        disabled={isLoading}
+        onSlidingStart={() => {
+          isSeekingRef.current = true;
+          stopSpeech();
+        }}
+        onSlidingComplete={(value) => {
+          const newProgress = Math.min(Math.max(value, 0), 1);
+          setProgress(newProgress);
+          isSeekingRef.current = false;
+          if (newProgress < 0.99) setTimeout(() => startSpeech(newProgress), 150);
+        }}
+      />
 
-          {/* Progress Slider */}
-          <Slider
-            style={styles.slider}
-            minimumValue={0}
-            maximumValue={1}
-            value={progress}
-            minimumTrackTintColor="#3B82F6"
-            maximumTrackTintColor="rgba(0,0,0,0.08)"
-            thumbTintColor="#3B82F6"
-            disabled={isLoading}
-            onSlidingStart={() => {
-              isSeekingRef.current = true;
-              stopSpeech();
-            }}
-            onSlidingComplete={(value) => {
-              const newProgress = Math.min(Math.max(value, 0), 1);
-              setProgress(newProgress);
-              isSeekingRef.current = false;
-              if (newProgress < 0.99) {
-                setTimeout(() => startSpeech(newProgress), 150);
-              }
-            }}
-          />
-
-          {/* Stats */}
-          <View className="flex-row justify-center items-center" style={styles.statsContainer}>
-            <Text className="text-gray-400" style={styles.statsText}>
-              {content.trim().split(/\s+/).length} từ • {Math.round(progress * 100)}% hoàn thành
-            </Text>
-          </View>
-        </View>
-      )}
+      <Text className="text-gray-400 text-center text-xs mt-2">
+        {content.trim().split(/\s+/).length} từ • {Math.round(progress * 100)}% hoàn thành
+      </Text>
     </View>
+  )}
+</View>
+
   );
 }
 
 const styles = StyleSheet.create({
-  bottomBar: {
-    marginHorizontal: spacing(28),
-    marginBottom: spacing(32),
-    shadowColor: '#32325D',
-    shadowOpacity: 0.2,
-    shadowRadius: scaleSize(8),
-    shadowOffset: { width: 0, height: spacing(2) },
-    elevation: 6,
+  speechCard: {
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 2,
   },
-  header: {
-    paddingHorizontal: spacing(14),
-    paddingTop: spacing(10),
-    paddingBottom: spacing(10),
+  cardTitle: {
+    fontSize: 15,
   },
-  headerLeft: {
-    gap: spacing(12),
+  cardSubtitle: {
+    fontSize: 12,
   },
-  headerRight: {
-    gap: spacing(8),
+  cardSpeedText: {
+    fontSize: 13,
   },
-  appIcon: {
-    width: scaleSize(36),
-    height: scaleSize(36),
-    borderRadius: scaleSize(6),
-    opacity: 0.9,
+  cardActionText: {
+    fontSize: 13,
   },
-  playOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: scaleSize(36),
-    height: scaleSize(36),
-    borderRadius: scaleSize(6),
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  statusText: {
-    fontSize: scaleFont(14),
-  },
-  voiceText: {
-    fontSize: scaleFont(11),
-    marginTop: 2,
-  },
-  speedButton: {
-    minWidth: scaleSize(32),
-    alignItems: 'center',
-    paddingHorizontal: spacing(6),
-    paddingVertical: spacing(4),
-    backgroundColor: '#f3f4f6',
-    borderRadius: scaleSize(8),
-  },
-  speedText: {
-    fontSize: scaleFont(12),
-  },
-  expandButton: {
-    marginLeft: spacing(4),
-  },
-  closeButton: {
-    marginLeft: spacing(4),
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: spacing(16),
-  },
-  errorText: {
-    color: '#dc2626',
-    fontSize: scaleFont(14),
-    fontWeight: '500',
-  },
-  expandedContainer: {
-    paddingHorizontal: spacing(16),
-    paddingTop: spacing(8),
-    paddingBottom: spacing(16),
-  },
-  voiceSettings: {
-    marginBottom: spacing(16),
-    paddingBottom: spacing(12),
-    borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f6',
-  },
-  voiceButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing(6),
-  },
-  voiceButtonText: {
-    fontSize: scaleFont(13),
-  },
-  cacheText: {
-    fontSize: scaleFont(11),
-  },
-  controlButtons: {
-    marginBottom: spacing(12),
-    marginTop: spacing(8),
-  },
-  mainPlayButton: {
-    padding: spacing(16),
-  },
-  timeContainer: {
-    marginBottom: spacing(4),
-  },
-  timeText: {
-    fontSize: scaleFont(12),
-  },
-  slider: {
-    width: '100%',
-    height: spacing(30),
-  },
-  statsContainer: {
-    marginTop: spacing(8),
-  },
-  statsText: {
-    fontSize: scaleFont(12),
+    bottomBarContent: {
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
 });

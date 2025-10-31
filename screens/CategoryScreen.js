@@ -304,22 +304,22 @@ export default function CategoryScreen() {
       <StatusBar barStyle="dark-content" backgroundColor="white" />
       
       {/* Header */}
-      <View className="py-3 px-4 bg-white relative">
+      <View className="py-4 px-4 bg-white relative">
         {/* Nút Back */}
         <TouchableOpacity
           onPress={() => navigation.goBack()}
           className="absolute left-4 top-1/2 -translate-y-2 p-2 rounded-full bg-gray-100 z-10"
           style={{
             top: '80%',
-            transform: [{ translateY: -20 }],
+            transform: [{ translateY: -12 }],
           }}
         >
-          <ChevronLeft size={24} color="#000" />
+          <ChevronLeft size={20} color="#000" />
         </TouchableOpacity>
 
         {/* Tiêu đề ở giữa */}
         <Text
-          className="text-2xl font-sf-bold text-black text-center"
+          className="text-xl font-sf-bold text-black text-center"
           numberOfLines={1}
         >
           Tất cả tin

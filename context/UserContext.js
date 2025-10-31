@@ -27,11 +27,9 @@ export const UserProvider = ({ children }) => {
         const parsedUser = JSON.parse(userData);
         setUser(parsedUser);
         setIsAuthenticated(true);
-        console.log('✅ User loaded from storage:', parsedUser.email);
       } else {
         setUser(null);
         setIsAuthenticated(false);
-        console.log('ℹ️ No user data in storage');
       }
     } catch (error) {
       console.error('❌ Error loading user:', error);
@@ -48,7 +46,6 @@ export const UserProvider = ({ children }) => {
       await AsyncStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       setIsAuthenticated(true);
-      console.log('✅ User saved to storage:', userData.email);
     } catch (error) {
       console.error('❌ Error saving user:', error);
       throw error;
@@ -61,7 +58,6 @@ export const UserProvider = ({ children }) => {
       const updatedUser = { ...user, ...updates };
       await AsyncStorage.setItem('user', JSON.stringify(updatedUser));
       setUser(updatedUser);
-      console.log('✅ User updated:', Object.keys(updates));
       return updatedUser;
     } catch (error) {
       console.error('❌ Error updating user:', error);
@@ -75,7 +71,6 @@ export const UserProvider = ({ children }) => {
       await AsyncStorage.removeItem('user');
       setUser(null);
       setIsAuthenticated(false);
-      console.log('✅ User logged out');
     } catch (error) {
       console.error('❌ Error logging out:', error);
       throw error;

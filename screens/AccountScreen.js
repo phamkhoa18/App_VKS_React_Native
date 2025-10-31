@@ -43,9 +43,9 @@ import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, GRADIENTS } from '../constants/colors';
 // ✅ IMPORT MANUAL UPDATE CHECKER
-import { ManualUpdateChecker } from '../components/UpdateManager';
+import { useManualUpdateChecker } from '../components/UpdateManager';
 import { FONT_CONFIG } from '../constants/fonts';
-
+import { useUser } from '../context/UserContext';
 const { width } = Dimensions.get('window');
 
 // ✅ NEWS APP COLOR SYSTEM FOR INSPECTION INSTITUTE
@@ -57,9 +57,10 @@ export default function ProfileScreen() {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  
 
   // ✅ MANUAL UPDATE CHECKER HOOK
-  const { handleManualCheck, isChecking } = ManualUpdateChecker();
+const { handleManualCheck, isChecking } = useManualUpdateChecker();
 
   useEffect(() => {
     loadUserData();

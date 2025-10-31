@@ -169,7 +169,7 @@ const LoadingSkeleton = () => (
       <ShimmerSkeleton width="100%" height={spacing(230)} borderRadius={0} />
       
       <View style={styles.articleBody}>
-        <View style={{ marginBottom: spacing(16) }}>
+        <View style={{ marginBottom: 16 }}>
           <ShimmerSkeleton width="95%" height={22} borderRadius={6} style={{ marginBottom: 8 }} />
           <ShimmerSkeleton width="80%" height={22} borderRadius={6} />
         </View>
@@ -183,7 +183,7 @@ const LoadingSkeleton = () => (
         </View>
 
         <View style={styles.summaryGradient}>
-          <View style={{ backgroundColor: '#f3f4f6', borderRadius: scaleSize(12), padding: spacing(16) }}>
+          <View style={{ backgroundColor: '#f3f4f6', borderRadius: scaleSize(12), padding: 16 }}>
             <ShimmerSkeleton width={120} height={18} borderRadius={6} style={{ marginBottom: 12 }} />
             <ShimmerSkeleton width="100%" height={16} borderRadius={4} style={{ marginBottom: 8 }} />
             <ShimmerSkeleton width="90%" height={16} borderRadius={4} style={{ marginBottom: 8 }} />
@@ -245,7 +245,7 @@ const MemoizedHtmlImage = React.memo(({ src, alt, title, contentWidth }) => {
   if (isLoading || !imageSize) {
     return (
       <View style={{
-        marginVertical: spacing(8),
+        marginVertical: 8,
         alignItems: 'center',
         width: '100%',
       }}>
@@ -253,7 +253,7 @@ const MemoizedHtmlImage = React.memo(({ src, alt, title, contentWidth }) => {
           width: contentWidth,
           height: 200,
           backgroundColor: '#F3F4F6',
-          borderRadius: scaleSize(8),
+          borderRadius: 8,
           justifyContent: 'center',
           alignItems: 'center',
         }}>
@@ -265,7 +265,7 @@ const MemoizedHtmlImage = React.memo(({ src, alt, title, contentWidth }) => {
 
   return (
     <View style={{
-      marginVertical: spacing(8),
+      marginVertical: 8,
       alignItems: 'center',
       width: '100%',
     }}>
@@ -274,7 +274,7 @@ const MemoizedHtmlImage = React.memo(({ src, alt, title, contentWidth }) => {
         style={{
           width: imageSize.width,
           height: imageSize.height,
-          borderRadius: scaleSize(8),
+          borderRadius: 8,
         }}
         resizeMode="cover"
         onError={(error) => {
@@ -283,13 +283,13 @@ const MemoizedHtmlImage = React.memo(({ src, alt, title, contentWidth }) => {
       />
       {(alt || title) && (
         <Text style={{
-          fontSize: scaleFont(14),
+          fontSize: 14,
           fontStyle: 'italic',
           color: '#6B7280',
-          marginTop: spacing(4),
+          marginTop: 4,
           textAlign: 'center',
           fontFamily: FONT_CONFIG.regular,
-          paddingHorizontal: spacing(8),
+          paddingHorizontal: 8,
         }}>
           {alt || title}
         </Text>
@@ -301,7 +301,7 @@ const MemoizedHtmlImage = React.memo(({ src, alt, title, contentWidth }) => {
 // ✅ HTML CONTENT RENDERER COMPONENT - ĐƯỢC MEMOIZED ĐỂ TRÁNH RE-RENDER
 const HtmlContentRenderer = React.memo(({ htmlContent }) => {
   const { width } = useWindowDimensions();
-  const contentWidth = width - spacing(28);
+  const contentWidth = width - 80;
 
   // ✅ MEMOIZE CUSTOM RENDERERS ĐỂ TRÁNH TẠO LẠI OBJECT
   const renderers = useMemo(() => ({
@@ -322,7 +322,7 @@ const HtmlContentRenderer = React.memo(({ htmlContent }) => {
 
     figure: ({ TDefaultRenderer, ...props }) => (
       <View style={{
-        marginVertical: spacing(12),
+        marginVertical: 12,
         alignItems: 'center',
         width: '100%',
       }}>
@@ -332,10 +332,10 @@ const HtmlContentRenderer = React.memo(({ htmlContent }) => {
 
     figcaption: ({ TDefaultRenderer, ...props }) => (
       <Text style={{
-        fontSize: scaleFont(14),
+        fontSize: 14,
         fontStyle: 'italic',
         color: '#6B7280',
-        marginTop: spacing(4),
+        marginTop: 4,
         textAlign: 'center',
         fontFamily: FONT_CONFIG.regular,
         paddingHorizontal: spacing(8),
@@ -349,8 +349,8 @@ const HtmlContentRenderer = React.memo(({ htmlContent }) => {
   const htmlStyles = useMemo(() => ({
     body: {
       fontFamily: FONT_CONFIG.regular,
-      fontSize: scaleFont(16),
-      lineHeight: scaleFont(26),
+      fontSize: 16,
+      lineHeight: 26,
       color: '#1F2937',
       padding: 0,
       margin: 0,
@@ -358,66 +358,66 @@ const HtmlContentRenderer = React.memo(({ htmlContent }) => {
     },
     p: {
       fontFamily: FONT_CONFIG.regular,
-      fontSize: scaleFont(16),
-      lineHeight: scaleFont(26),
+      fontSize: 16,
+      lineHeight: 26,
       color: '#1F2937',
-      marginVertical: spacing(6),
+      marginVertical: 6,
       textAlign: 'justify',
     },
     h1: {
       fontFamily: FONT_CONFIG.bold,
-      fontSize: scaleFont(26),
+      fontSize: 26,
       color: '#111827',
-      marginVertical: spacing(12),
-      lineHeight: scaleFont(32),
+      marginVertical: 12,
+      lineHeight: 32,
     },
     h2: {
       fontFamily: FONT_CONFIG.bold,
-      fontSize: scaleFont(22),
+      fontSize: 22,
       color: '#111827',
-      marginVertical: spacing(10),
-      lineHeight: scaleFont(28),
+      marginVertical: 10,
+      lineHeight: 28,
     },
     h3: {
       fontFamily: FONT_CONFIG.bold,
-      fontSize: scaleFont(20),
+      fontSize: 20,
       color: '#111827',
-      marginVertical: spacing(8),
-      lineHeight: scaleFont(26),
+      marginVertical: 8,
+      lineHeight: 26,
     },
     h4: {
       fontFamily: FONT_CONFIG.medium,
-      fontSize: scaleFont(18),
+      fontSize: 18,
       color: '#111827',
-      marginVertical: spacing(6),
-      lineHeight: scaleFont(24),
+      marginVertical: 6,
+      lineHeight: 24,
     },
     h5: {
       fontFamily: FONT_CONFIG.medium,
-      fontSize: scaleFont(16),
+      fontSize: 16,
       color: '#111827',
-      marginVertical: spacing(4),
-      lineHeight: scaleFont(22),
+      marginVertical: 4,
+      lineHeight: 22,
     },
     h6: {
       fontFamily: FONT_CONFIG.medium,
-      fontSize: scaleFont(14),
+      fontSize: 14,
       color: '#111827',
-      marginVertical: spacing(4),
-      lineHeight: scaleFont(20),
+      marginVertical: 4,
+      lineHeight: 20,
     },
     blockquote: {
       fontFamily: FONT_CONFIG.regular,
-      borderLeftWidth: scaleSize(4),
+      borderLeftWidth: 4,
       borderLeftColor: '#3B82F6',
-      paddingLeft: spacing(16),
+      paddingLeft: 16,
       backgroundColor: '#F8FAFC',
-      padding: spacing(16),
-      borderRadius: scaleSize(8),
-      marginVertical: spacing(12),
+      padding: 16,
+      borderRadius: 8,
+      marginVertical: 12,
       fontStyle: 'italic',
-      fontSize: scaleFont(16),
-      lineHeight: scaleFont(24),
+      fontSize: 16,
+      lineHeight: 24,
       color: '#374151',
     },
     strong: {
@@ -444,59 +444,59 @@ const HtmlContentRenderer = React.memo(({ htmlContent }) => {
     },
     ul: {
       fontFamily: FONT_CONFIG.regular,
-      marginVertical: spacing(8),
-      paddingLeft: spacing(20),
+      marginVertical: 8,
+      paddingLeft: 20,
     },
     ol: {
       fontFamily: FONT_CONFIG.regular,
-      marginVertical: spacing(8),
-      paddingLeft: spacing(20),
+      marginVertical: 8,
+      paddingLeft: 20,
     },
     li: {
       fontFamily: FONT_CONFIG.regular,
-      fontSize: scaleFont(16),
-      lineHeight: scaleFont(24),
+      fontSize: 16,
+      lineHeight: 24,
       color: '#1F2937',
       marginVertical: spacing(2),
     },
     table: {
       borderWidth: 1,
       borderColor: '#E5E7EB',
-      borderRadius: scaleSize(8),
-      marginVertical: spacing(12),
+      borderRadius: 8,
+      marginVertical: 12,
       width: '100%',
     },
     th: {
       fontFamily: FONT_CONFIG.medium,
       backgroundColor: '#F9FAFB',
-      padding: spacing(8),
+      padding: 8,
       borderWidth: 1,
       borderColor: '#E5E7EB',
-      fontSize: scaleFont(14),
+      fontSize: 14,
     },
     td: {
       fontFamily: FONT_CONFIG.regular,
-      padding: spacing(8),
+      padding: 8,
       borderWidth: 1,
       borderColor: '#E5E7EB',
-      fontSize: scaleFont(14),
+      fontSize: 14,
     },
     pre: {
       fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
       backgroundColor: '#F3F4F6',
-      padding: spacing(12),
+      padding: 12,
       borderRadius: scaleSize(6),
-      fontSize: scaleFont(14),
-      lineHeight: scaleFont(18),
-      marginVertical: spacing(8),
+      fontSize: 14,
+      lineHeight: 18,
+      marginVertical: 8,
     },
     code: {
       fontFamily: Platform.OS === 'ios' ? 'Courier' : 'monospace',
       backgroundColor: '#F3F4F6',
-      paddingHorizontal: spacing(4),
+      paddingHorizontal: 4,
       paddingVertical: spacing(2),
-      borderRadius: scaleSize(4),
-      fontSize: scaleFont(14),
+      borderRadius: 4,
+      fontSize: 14,
     },
     div: {
       fontFamily: FONT_CONFIG.regular,
@@ -520,8 +520,8 @@ const HtmlContentRenderer = React.memo(({ htmlContent }) => {
   const defaultTextProps = useMemo(() => ({
     style: {
       fontFamily: FONT_CONFIG.regular,
-      fontSize: scaleFont(16),
-      lineHeight: scaleFont(26),
+      fontSize: 16,
+      lineHeight: 26,
       color: '#1F2937',
       textAlign: 'justify',
     },
@@ -551,8 +551,8 @@ const HtmlContentRenderer = React.memo(({ htmlContent }) => {
         enableExperimentalMarginCollapsing={true}
         ignoredTags={['script', 'style']}
         baseStyle={{
-          fontSize: scaleFont(16),
-          lineHeight: scaleFont(26),
+          fontSize: 16,
+          lineHeight: 26,
           fontFamily: FONT_CONFIG.regular,
           color: '#1F2937',
         }}
@@ -579,8 +579,8 @@ export default function ArticleDetailScreen() {
     toggleSaveWithAlert,
     saveIcon,
   } = useSavedArticles(articleId);
-
-  console.log(isSaved);
+  const { width } = useWindowDimensions();
+  const isTablet = width >= 768;
   
 
   // ✅ LOADING STATES - LOẠI BỎ FONT LOADING
@@ -610,13 +610,6 @@ export default function ArticleDetailScreen() {
   const isContentReady = !loadingStates.article && article;
   const shouldShowHtmlContent = isContentReady && article?.htmlcontent;
 
-  // ✅ DEBUG LOGS
-  useEffect(() => {
-    console.log('🔍 Loading states:', loadingStates);
-    // console.log('🔍 Content ready:', isContentReady.name);
-    console.log('✅ Using SF Pro fonts from App.js:', FONT_CONFIG);
-  }, [loadingStates, isContentReady]);
-
   // ✅ VALIDATE ARTICLE ID
   useEffect(() => {
     if (!articleId) {
@@ -624,7 +617,6 @@ export default function ArticleDetailScreen() {
       setError('Không tìm thấy ID bài viết');
       return;
     }
-    console.log('✅ Article ID found:', articleId);
   }, [articleId]);
 
   // ✅ ARTICLE DATA LOADING
@@ -639,7 +631,6 @@ export default function ArticleDetailScreen() {
     if (shouldShowHtmlContent) {
       const timer = setTimeout(() => {
         setLoadingStates(prev => ({ ...prev, htmlReady: true }));
-        console.log('✅ HTML content ready for rendering');
       }, 300);
       
       return () => clearTimeout(timer);
@@ -665,8 +656,6 @@ export default function ArticleDetailScreen() {
       setError(null);
       setLoadingStates(prev => ({ ...prev, article: true }));
       
-      console.log('🔄 Fetching article for ID:', articleId);
-      
       const [articleResponse, relatedResponse] = await Promise.allSettled([
         articlesAPI.getById(articleId),
         articlesAPI.getRelated(articleId, 4)
@@ -681,7 +670,6 @@ export default function ArticleDetailScreen() {
 
       if (relatedResponse.status === 'fulfilled' && relatedResponse.value.success) {
         setRelatedArticles(relatedResponse.value.data || []);
-        console.log('✅ Related articles loaded:', relatedResponse.value.data?.length);
       }
 
     } catch (error) {
@@ -759,7 +747,7 @@ export default function ArticleDetailScreen() {
     
     return {
       position: 'absolute',
-      bottom: spacing(4),
+      bottom: 0,
       left: 0,
       right: 0,
       zIndex: 50,
@@ -830,7 +818,7 @@ export default function ArticleDetailScreen() {
 
   // ✅ MAIN RENDER WITH RENDER HTML
   return (
-    <SafeAreaView
+    <View
       style={{
         flex: 1,
         backgroundColor: '#F9FAFB', // Đặt màu nền đồng nhất với bg-gray-50
@@ -853,16 +841,13 @@ export default function ArticleDetailScreen() {
             right: 0,
             zIndex: 1000,
             elevation: 1000,
+            paddingTop: insets.top,
             backgroundColor: 'transparent',
           }}
           edges={['top']} // Chỉ áp dụng safe area cho cạnh trên
         >
           <View
-            style={{
-              paddingHorizontal: spacing(12),
-              paddingTop: insets.top, // Áp dụng insets.top trực tiếp
-              paddingBottom: spacing(8), // Thêm paddingBottom để tạo khoảng cách đẹp
-            }}
+            className='p-4'
           >
             <View style={styles.topNav}>
               <View className="flex-row justify-between items-center">
@@ -871,14 +856,14 @@ export default function ArticleDetailScreen() {
                   onPress={() => navigation.goBack()}
                   style={styles.navButton}
                 >
-                  <ChevronLeft size={scaleSize(22)} color="#000" strokeWidth={1.5} />
+                  <ChevronLeft size={18} color="#000" strokeWidth={1.5} />
                 </TouchableOpacity>
                 <View className="flex-row space-x-2">
                   <TouchableOpacity
                     className="bg-white/90 rounded-full p-2"
                     style={styles.navButton}
                   >
-                    <EllipsisVertical size={scaleSize(22)} color="#000" strokeWidth={1.5} />
+                    <EllipsisVertical size={18} color="#000" strokeWidth={1.5} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -901,21 +886,20 @@ export default function ArticleDetailScreen() {
                 {article?.image ? (
                   <Image
                     source={{ uri: article.image }}
-                    style={styles.mainImage}
+                    className='w-full h-[250px] md:h-[400px]'
                     resizeMode="cover"
                   />
                 ) : (
                   <Image
                     source={require('../assets/news.jpg')}
-                    style={styles.mainImage}
+                    className='w-full h-[250px] md:h-[400px]'
                     resizeMode="cover"
                   />
                 )}
                 <View className="absolute inset-0 bg-black/50" style={{ zIndex: 1 }} />
                 <View style={[styles.imageOverlay, { zIndex: 2 }]}>
                   <Text
-                    style={styles.articleTitle}
-                    className="font-sf-bold text-white leading-7"
+                    className="font-sf-bold text-white leading-7 text-xl md:text-2xl"
                   >
                     {article?.title || 'Đang tải...'}
                   </Text>
@@ -927,24 +911,24 @@ export default function ArticleDetailScreen() {
             <View style={styles.articleBody}>
               <SmoothTransition isVisible={isContentReady} delay={200}>
                 {/* Dynamic Meta */}
-                <View className="flex-row items-center justify-between mb-3 flex-wrap">
+                <View className="flex-row items-center justify-between mb-3 md-mb-4 flex-wrap">
                   <View className="flex-row items-center gap-3 flex-wrap">
                     <View className="flex-row items-center gap-1.5">
-                      <Clock size={scaleSize(16)} color="#9CA3AF" strokeWidth={2} />
-                      <Text style={styles.metaText} className="font-sf-medium text-gray-400">
+                      <Clock size={18} color="#9CA3AF" strokeWidth={2} />
+                      <Text className="font-sf-medium text-gray-400 text-sm md:text-xl">
                         {formatTime(article?.publishDate || article?.createdAt)}
                       </Text>
                     </View>
                     <View className="flex-row items-center gap-1.5">
-                      <Newspaper size={scaleSize(16)} color="#9CA3AF" strokeWidth={2} />
-                      <Text style={styles.metaText} className="font-sf-bold text-gray-400">
+                      <Newspaper size={18} color="#9CA3AF" strokeWidth={2} />
+                      <Text className="font-sf-bold text-gray-400 text-sm md:text-xl">
                         {article?.author || 'Không rõ nguồn'}
                       </Text>
                     </View>
                   </View>
                   <View className="flex-row items-center gap-1.5">
-                    <Tag size={scaleSize(16)} color="#3B82F6" strokeWidth={2} />
-                    <Text style={styles.metaText} className="font-sf-bold text-blue-600">
+                    <Tag size={18} color="#3B82F6" strokeWidth={2} />
+                    <Text className="font-sf-bold text-blue-600 text-sm md:text-xl">
                       {article?.categories?.name || 'Tin tức'}
                     </Text>
                   </View>
@@ -962,24 +946,27 @@ export default function ArticleDetailScreen() {
                   <View
                     style={{
                       backgroundColor: isExpanded ? '#f3f4f6' : '#ffffff',
-                      borderRadius: scaleSize(12),
+                      borderRadius: 12,
                     }}
                   >
                     <TouchableOpacity
                       onPress={() => setIsExpanded(!isExpanded)}
-                      style={styles.summaryHeader}
+                      style={{
+                        padding: 6,
+                        paddingHorizontal: 16,
+                      }}
                     >
                       <View className="flex-row items-center justify-between">
                         <View className="flex-row gap-2 items-center">
-                          <Sparkles color="#374151" size={scaleSize(18)} strokeWidth={2.5} />
-                          <Text style={styles.summaryTitle} className="font-sf-bold text-gray-700">
+                          <Sparkles color="#374151" size={18} strokeWidth={2.5} />
+                          <Text className="font-sf-bold text-lg md:text-xl text-gray-700">
                             Tóm tắt
                           </Text>
                         </View>
                         {isExpanded ? (
-                          <ChevronUp size={scaleSize(16)} color="#374151" strokeWidth={2.5} />
+                          <ChevronUp size={16} color="#374151" strokeWidth={2.5} />
                         ) : (
-                          <ChevronDown size={scaleSize(16)} color="#374151" strokeWidth={2.5} />
+                          <ChevronDown size={16} color="#374151" strokeWidth={2.5} />
                         )}
                       </View>
                     </TouchableOpacity>
@@ -991,8 +978,7 @@ export default function ArticleDetailScreen() {
                             <View key={i} className="flex-row w-full items-start mb-2">
                               <View className="bg-gray-700 w-1.5 h-1.5 rounded-full ml-2 mt-2 mr-3" />
                               <Text
-                                style={styles.summaryText}
-                                className="flex-1 font-sf-medium text-gray-700"
+                                className="flex-1 font-sf-medium text-gray-700 text-lg md:text-xl"
                               >
                                 {point}
                               </Text>
@@ -1000,15 +986,13 @@ export default function ArticleDetailScreen() {
                           ))
                         ) : (
                           <Text
-                            style={styles.summaryText}
-                            className="font-sf-medium text-gray-700"
+                            className="font-sf-medium text-gray-700 text-lg md:text-xl"
                           >
                             {article?.description || 'Tóm tắt đang được tạo...'}
                           </Text>
                         )}
                         <Text
-                          style={styles.summaryNote}
-                          className="font-sf-regular text-gray-400"
+                          className="font-sf-regular text-gray-400 text-sm md:text-lg p-2"
                         >
                           Tóm tắt này được tạo bởi AI và có thể chứa thông tin không chính xác.
                         </Text>
@@ -1021,10 +1005,9 @@ export default function ArticleDetailScreen() {
               <SmoothTransition isVisible={isContentReady} delay={400}>
                 {/* Description */}
                 {article?.description && (
-                  <View style={{ marginBottom: spacing(2) }}>
+                  <View>
                     <Text
-                      style={[styles.articleContent, { fontWeight: '600', color: '#1F2937'}]}
-                      className="font-sf-medium text-justify"
+                      className="font-sf-medium text-justify text-lg text-[#1F2937] md:text-2xl"
                     >
                       {article.description}
                     </Text>
@@ -1043,14 +1026,14 @@ export default function ArticleDetailScreen() {
                         justifyContent: 'center',
                         alignItems: 'center',
                         backgroundColor: '#F9FAFB',
-                        borderRadius: scaleSize(8),
-                        marginVertical: spacing(8),
+                        borderRadius: 8,
+                        marginVertical: 8,
                       }}>
                         <ActivityIndicator size="large" color="#3B82F6" />
                         <Text style={{
-                          fontSize: scaleFont(14),
+                          fontSize: 14,
                           color: '#6B7280',
-                          marginTop: spacing(8),
+                          marginTop: 8,
                           fontWeight: '500',
                           fontFamily: FONT_CONFIG.medium,
                         }}>
@@ -1069,9 +1052,9 @@ export default function ArticleDetailScreen() {
                     {/* ✅ THÊM NGUỒN LINK */}
                     {loadingStates.htmlReady && (
                       <View className='flex-row w-full'>
-                        <Text style={{ fontSize: scaleFont(16), color: '#000', fontFamily: FONT_CONFIG.medium }}>Nguồn: </Text>
+                        <Text style={{ fontSize: 16, color: '#000', fontFamily: FONT_CONFIG.medium }}>Nguồn: </Text>
                         <TouchableOpacity onPress={() => Linking.openURL(article?.source)}>
-                          <Text className='pl-[4px]' style={{ fontSize: scaleFont(16), color: '#0066cc', fontFamily: FONT_CONFIG.medium }}>
+                          <Text className='pl-[4px]' style={{ fontSize: 16, color: '#0066cc', fontFamily: FONT_CONFIG.medium }}>
                             {article?.author}
                           </Text>
                         </TouchableOpacity>
@@ -1082,16 +1065,16 @@ export default function ArticleDetailScreen() {
                   </View>
                 ) : (
                   <View style={{ 
-                    padding: spacing(16), 
+                    padding: 16, 
                     backgroundColor: '#F3F4F6', 
-                    borderRadius: scaleSize(8),
+                    borderRadius: 8,
                     alignItems: 'center',
                   }}>
                     <Text style={{
                       color: '#6B7280',
                       textAlign: 'center',
                       fontFamily: FONT_CONFIG.regular,
-                      fontSize: scaleFont(14),
+                      fontSize:14,
                     }}>
                       Không có nội dung HTML
                     </Text>
@@ -1103,7 +1086,7 @@ export default function ArticleDetailScreen() {
             {/* Related Articles */}
             <SmoothTransition isVisible={isContentReady && relatedArticles.length > 0} delay={600}>
               <View style={styles.relatedArticles}>
-                <Text style={styles.relatedTitle} className="font-sf-bold text-gray-900">
+                <Text className="font-sf-bold text-gray-900 text-xl md:text-2xl mb-5">
                   Tin tức liên quan
                 </Text>
 
@@ -1118,12 +1101,11 @@ export default function ArticleDetailScreen() {
                         onPress={() => handleRelatedArticlePress(item)}
                       >
                         <View className="flex-1 pr-3">
-                          <Text style={styles.relatedSource} className="font-sf-medium text-gray-400 leading-none">
+                          <Text className="font-sf-medium text-gray-400 leading-none text-sm md:text-xl">
                             {item.author || 'Không rõ nguồn'}
                           </Text>
                           <Text
-                            style={styles.relatedArticleTitle}
-                            className="font-sf-bold text-gray-900"
+                            className="font-sf-bold text-gray-900  text-lg md:text-xl"
                             numberOfLines={3}
                             ellipsizeMode="tail"
                           >
@@ -1133,13 +1115,13 @@ export default function ArticleDetailScreen() {
                         {item.image ? (
                           <Image
                             source={{ uri: item.image }}
-                            style={styles.relatedImage}
+                            className='w-[80px] h-[80px] md:w-[120px] md:h-[120px] rounded-lg'
                             resizeMode="cover"
                           />
                         ) : (
                           <Image
                             source={require('../assets/news.jpg')}
-                            style={styles.relatedImage}
+                            className='w-[80px] h-[80px] md:w-[120px] md:h-[120px] rounded-lg'
                             resizeMode="cover"
                           />
                         )}
@@ -1170,61 +1152,65 @@ export default function ArticleDetailScreen() {
               position: 'absolute',
               bottom: 0,
               width: '100%',
-              paddingHorizontal: spacing(12),
+              alignItems: 'center', // căn giữa
               zIndex: 100,
             }}
           >
             <View
-              className="bg-white rounded-xl mx-5 mb-12"
-              style={styles.bottomBar}
+              className="bg-white rounded-xl mb-12"
+              style={[
+                styles.bottomBar,
+                {
+                  width: isTablet ? 400 : '90%',
+                  maxWidth: 400,
+                  paddingHorizontal: 12,
+                },
+              ]}
             >
               <View className="flex-row items-center justify-between" style={styles.bottomBarContent}>
-              <View className="flex-row items-center space-x-1 gap-1">
-                <TouchableOpacity>
-                  <Heart size={scaleSize(24)} color="#374151" strokeWidth={2} />
-                </TouchableOpacity>
-                <Text style={styles.bottomBarText} className="font-sf-medium text-gray-800">
-                  {article?.likes || 0}
-                </Text>
-              </View>
-              
-              {/* ✅ FIX BOOKMARK BUTTON */}
-              <TouchableOpacity 
-                onPress={toggleSaveWithAlert}
-                disabled={isToggling}
-                style={{ 
-                  opacity: isToggling ? 0.6 : 1,
-                  padding: 4, // Tăng touch area
-                }}
-              >
-                {isToggling ? (
-                  <ActivityIndicator size="small" color="#3B82F6" />
-                ) : (
-                  <Bookmark 
-                    size={scaleSize(24)} 
-                    color={saveIcon.color} 
-                    fill={saveIcon.fill}
-                    strokeWidth={2} 
-                  />
-                )}
-              </TouchableOpacity>
-              
-              <TouchableOpacity onPress={handleOpenTextReader}>
-                <AudioLines size={scaleSize(24)} color="#374151" strokeWidth={2} />
-              </TouchableOpacity>
+                <View className="flex-row items-center space-x-1 gap-1">
+                  <TouchableOpacity>
+                    <Heart size={24} color="#374151" strokeWidth={2} />
+                  </TouchableOpacity>
+                  <Text style={styles.bottomBarText} className="font-sf-medium text-gray-800">
+                    {article?.likes || 0}
+                  </Text>
+                </View>
 
-              <TouchableOpacity className="flex-row items-center gap-1">
-                <Share size={scaleSize(22)} color="#374151" strokeWidth={2} />
-                <Text style={styles.bottomBarText} className="font-sf-medium text-gray-800">
-                  Chia sẻ
-                </Text>
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity 
+                  onPress={toggleSaveWithAlert}
+                  disabled={isToggling}
+                  style={{ opacity: isToggling ? 0.6 : 1, padding: 4 }}
+                >
+                  {isToggling ? (
+                    <ActivityIndicator size="small" color="#3B82F6" />
+                  ) : (
+                    <Bookmark 
+                      size={24} 
+                      color={saveIcon.color} 
+                      fill={saveIcon.fill}
+                      strokeWidth={2} 
+                    />
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={handleOpenTextReader}>
+                  <AudioLines size={24} color="#374151" strokeWidth={2} />
+                </TouchableOpacity>
+
+                <TouchableOpacity className="flex-row items-center gap-1">
+                  <Share size={22} color="#374151" strokeWidth={2} />
+                  <Text style={styles.bottomBarText} className="font-sf-medium text-gray-800">
+                    Chia sẻ
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </Animated.View>
         </SmoothTransition>
+
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -1247,78 +1233,78 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   scrollContent: {
-    paddingBottom: spacing(80),
+    paddingBottom: spacing(0),
   },
   mainImage: {
     width: '100%',
-    height: spacing(250),
+    height: 250,
   },
   imageOverlay: {
     position: 'absolute',
-    bottom: spacing(8),
-    left: spacing(12),
-    right: spacing(12),
+    bottom: 8,
+    left: 12,
+    right: 12,
   },
   articleTitle: {
-    fontSize: scaleFont(19),
+    fontSize: 19,
   },
   articleBody: {
-    paddingHorizontal: spacing(14),
-    paddingVertical: spacing(12),
+    paddingHorizontal: 14,
+    paddingVertical: 12,
   },
   metaText: {
-    fontSize: scaleFont(14),
+    fontSize: 14,
   },
   summaryGradient: {
-    borderRadius: scaleSize(12),
-    padding: scaleSize(1.5),
-    marginBottom: spacing(12),
+    borderRadius: 12,
+    padding: 1.5,
+    marginBottom: 12,
   },
   summaryHeader: {
-    padding: spacing(6),
-    paddingHorizontal: spacing(16),
+    padding: 6,
+    paddingHorizontal: 16,
   },
   summaryTitle: {
-    fontSize: scaleFont(16),
+    fontSize: 16,
   },
   summaryContent: {
-    paddingHorizontal: spacing(12),
-    paddingBottom: spacing(8),
+    paddingHorizontal: 12,
+    paddingBottom: 8,
     gap: spacing(2),
   },
   summaryText: {
-    fontSize: scaleFont(16),
-    lineHeight: scaleFont(22),
+    fontSize: 16,
+    lineHeight: 22,
   },
   summaryNote: {
     fontSize: scaleFont(12),
-    padding: spacing(8),
+    padding: 8,
     paddingTop: 0,
     paddingBottom: 0,
-    lineHeight: scaleFont(16),
+    lineHeight: 16,
   },
   articleContent: {
-    fontSize: scaleFont(16),
-    lineHeight: scaleFont(24),
+    fontSize: 16,
+    lineHeight: 24,
   },
   htmlContentContainer: {
-    marginBottom: spacing(16),
+    marginBottom: 16,
     width: '100%',
     minHeight: spacing(100),
   },
   relatedArticles: {
-    paddingHorizontal: spacing(12),
-    paddingTop: spacing(12),
-    paddingBottom: spacing(20),
-    borderTopWidth: spacing(3),
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 20,
+    borderTopWidth: 3,
     borderTopColor: '#E5E7EB',
   },
   relatedTitle: {
-    fontSize: scaleFont(20),
-    marginBottom: spacing(12),
+    fontSize: 20,
+    marginBottom: 12,
   },
   relatedItem: {
-    marginBottom: spacing(8),
+    marginBottom: 8,
   },
   relatedSource: {
     fontSize: scaleFont(13),
@@ -1329,22 +1315,22 @@ const styles = StyleSheet.create({
   relatedImage: {
     width: scaleSize(80),
     height: scaleSize(80),
-    borderRadius: scaleSize(8),
+    borderRadius: 8,
   },
   bottomBar: {
     shadowColor: '#32325D',
     shadowOpacity: 0.2,
-    shadowRadius: scaleSize(8),
-    shadowOffset: { width: 0, height: spacing(2) },
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
     elevation: 6,
   },
   bottomBarContent: {
-    paddingTop: spacing(10),
-    paddingBottom: spacing(10),
-    paddingLeft: spacing(20),
-    paddingRight: spacing(20),
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   bottomBarText: {
-    fontSize: scaleFont(16),
+    fontSize: 16,
   },
 });

@@ -7,7 +7,6 @@ import {
   ScrollView,
   RefreshControl,
   FlatList,
-  StyleSheet,
   ActivityIndicator,
   StatusBar,
   SafeAreaView,
@@ -15,75 +14,152 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Search, AudioLines, Clock, ChevronRight } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import TextReader from '../components/TextReader';
 import { sectionsAPI, CategoriesAPI, articlesAPI } from '../services/apiService';
+import { useWindowDimensions } from 'react-native';
 
-// Memoized components (giữ nguyên)
-const MemoizedNewsItem = React.memo(({ article, showDivider = true, onPress }) => (
+export const FONT_CONFIG = {
+  black: 'SFPro-Black',
+  bold: 'SFPro-Bold',
+  regular: 'SFPro-Regular',
+  medium: 'SFPro-Medium',
+  light: 'SFPro-Light',
+};
+
+// Memoized components
+const MemoizedNewsItem = React.memo(({ article, showDivider = true, onPress, numColumns }) => (
   <TouchableOpacity 
-    className="mb-3"
+    style={{ marginBottom: 12 }}
     onPress={() => onPress(article)}
   >
-    <View className="flex-row">
-      <View className="flex-1 pr-3">
+    <View style={{ flexDirection: 'row' }}>
+      <View style={{ flex: 1, paddingRight: 12 }}>
         <Text
+          numberOfLines={2}
           ellipsizeMode="tail"
-          style={styles.newsText}
-          className="font-sf-medium text-gray-800"
+          style={[{
+            fontSize: numColumns === 3 ? 18 : 15,
+            lineHeight: 20,
+            color: '#1F2937'
+          }, { fontFamily: FONT_CONFIG.medium }]}
         >
           {article.title}
         </Text>
+        {numColumns === 3 && (
+          <Text
+            numberOfLines={4}
+            ellipsizeMode="tail"
+            style={[{
+              fontSize: 14,
+              color: '#6B7280',
+              marginTop: 4
+            }, { fontFamily: FONT_CONFIG.regular }]}
+          >
+            {article.description}
+          </Text>
+        )}
       </View>
       <Image
         source={article.image ? { uri: article.image } : require('../assets/logo_ai.jpg')}
-        style={styles.newsImage}
+        style={{
+          width: numColumns === 3 ? 120 : 80,
+          height: numColumns === 3 ? 120 : 80,
+          borderRadius: 8
+        }}
         defaultSource={require('../assets/logo_ai.jpg')}
       />
     </View>
-    {showDivider && <View style={styles.divider} />}
+    {showDivider && (
+      <View style={{
+        marginTop: 12,
+        height: 1,
+        backgroundColor: '#E5E7EB',
+        width: '100%'
+      }} />
+    )}
   </TouchableOpacity>
 ));
 
 const MemoizedArticleCard = React.memo(({ item, onPress }) => (
   <TouchableOpacity
-    className="rounded-lg w-[48%] flex flex-col gap-0 justify-between"
+    style={{
+      width: numColumns === 3 ? '31%' : '48%',
+      borderRadius: 8,
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      marginBottom: numColumns === 3 ? 16 : 8
+    }}
     onPress={() => onPress(item)}
   >
     <View>
       <Image
         source={item.image ? { uri: item.image } : require('../assets/news.jpg')}
-        style={styles.articleImage}
+        style={{
+          width: '100%',
+          height: numColumns === 3 ? 150 : 90,
+          borderRadius: 8,
+          marginBottom: 8,
+          backgroundColor: '#FFFFFF'
+        }}
         resizeMode="cover"
         defaultSource={require('../assets/logo_ai.jpg')}
       />
-      <Text style={styles.articleTitle} className="font-sf-bold text-gray-900" numberOfLines={3}>
+      <Text
+        numberOfLines={3}
+        style={[{
+          fontSize: numColumns === 3 ? 15 : 14,
+          lineHeight: numColumns === 3 ? 20 : 18,
+          color: '#111827',
+          marginBottom: numColumns === 3 ? 6 : 4
+        }, { fontFamily: FONT_CONFIG.bold }]}
+      >
         {item.title}
       </Text>
     </View>
-    <View className="flex-row items-center gap-1">
-      <Text style={styles.sourceText} className="font-sf-medium text-gray-400">{item.author}</Text>
-      <Text style={styles.timeText} className="font-sf-medium text-gray-400">• {item.time}</Text>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+      <Text style={[{
+        fontSize: numColumns === 3 ? 14 : 10,
+        color: '#9CA3AF'
+      }, { fontFamily: FONT_CONFIG.medium }]}>
+        {item.author}
+      </Text>
+      <Text style={[{
+        fontSize: numColumns === 3 ? 14 : 10,
+        color: '#9CA3AF'
+      }, { fontFamily: FONT_CONFIG.medium }]}>
+        • {item.time}
+      </Text>
     </View>
   </TouchableOpacity>
 ));
 
 const MemoizedCategoryItem = React.memo(({ item, isSelected, onPress }) => (
   <TouchableOpacity
-    className={`mr-2 px-4 py-2 rounded-lg items-center justify-center ${
-      isSelected ? 'bg-black' : 'bg-gray-200'
-    }`}
+    style={{
+      marginRight: 8,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderRadius: 8,
+      backgroundColor: isSelected ? '#000000' : '#E5E7EB',
+      alignItems: 'center',
+      justifyContent: 'center'
+    }}
     onPress={() => onPress(item)}
   >
     <Text
-      style={styles.categoryText}
-      className={`font-sf-medium ${isSelected ? 'text-white' : 'text-black'}`}
+      style={[{
+        fontSize: numColumns === 3 ? 16 : 12,
+        fontWeight: '500',
+        color: isSelected ? '#FFFFFF' : '#000000'
+      }, { fontFamily: FONT_CONFIG.medium }]}
     >
       {item}
     </Text>
   </TouchableOpacity>
 ));
+
+let numColumns;
 
 export default function HomeScreen() {
   const [articles, setArticles] = useState([]);
@@ -100,14 +176,17 @@ export default function HomeScreen() {
   const currentSectionPage = useRef(1);
   const [hasMoreArticles, setHasMoreArticles] = useState(true);
   const [hasMoreSections, setHasMoreSections] = useState(true);
+  const { width } = useWindowDimensions();
+
+  // Breakpoint 768px for tablet
+  numColumns = width >= 768 ? 3 : 2;
+  const articlesPerGroup = width >= 768 ? 6 : 4; // 6 items for tablet, 4 for mobile
 
   const today = new Date();
-
-  // format ngày theo tiếng Việt
   const formattedDate = new Intl.DateTimeFormat("vi-VN", {
-    weekday: "long", // Thứ Hai, Thứ Ba...
-    day: "numeric",  // số ngày
-    month: "long",   // tháng 8
+    weekday: "long",
+    day: "numeric",
+    month: "long",
   }).format(today);
 
   const loadingFlags = useRef({
@@ -167,7 +246,7 @@ export default function HomeScreen() {
     if (loadingFlags.current.articles && !isLoadMore) return;
     if (!isLoadMore) loadingFlags.current.articles = true;
     try {
-      const params = { page, limit: 8, sort: '-createdAt' };
+      const params = { page, limit: articlesPerGroup * 2, sort: '-createdAt' };
       const result = await articlesAPI.getAll(params);
       if (result.success && result.data && Array.isArray(result.data)) {
         const articlesData = result.data.map(article => ({
@@ -175,6 +254,7 @@ export default function HomeScreen() {
           _id: article._id,
           title: article.title,
           summary: article.summary,
+          description: article.description || article.summary,
           content: article.content,
           author: article.author,
           image: article.image,
@@ -202,7 +282,7 @@ export default function HomeScreen() {
     } finally {
       if (!isLoadMore) loadingFlags.current.articles = false;
     }
-  }, [formatTimeAgo]);
+  }, [formatTimeAgo, articlesPerGroup]);
 
   const loadSections = useCallback(async (page = 1, isLoadMore = false) => {
     if (loadingFlags.current.sections && !isLoadMore) return;
@@ -234,30 +314,25 @@ export default function HomeScreen() {
   }, [navigation]);
 
   const handleCategorySelect = useCallback((category) => {
-  if (category === selectedCategory) return;
-  
-  // Nếu là "All", chỉ cập nhật state local
-  if (category === 'All') {
-    setSelectedCategory(category);
-    return;
-  }
-  
-  // Với các category cụ thể, chuyển THẲNG đến SearchResultScreen
-  console.log('🔍 Navigate directly to search results for category:', category);
-  navigation.navigate('SearchResult', {
-    query: category,
-    type: 'category',
-    category: category,
-    filter: 'category'
-  });
-  
-  // Cập nhật state để UI hiển thị đúng
-}, [selectedCategory, navigation]);
+    if (category === selectedCategory) return;
+    
+    if (category === 'All') {
+      setSelectedCategory(category);
+      return;
+    }
+    
+    console.log('🔍 Navigate directly to search results for category:', category);
+    navigation.navigate('SearchResult', {
+      query: category,
+      type: 'category',
+      category: category,
+      filter: 'category'
+    });
+  }, [selectedCategory, navigation]);
 
-// Cũng cập nhật handleSearchPress để vẫn đi qua SearchScreen để người dùng có thể gõ
-const handleSearchPress = useCallback(() => {
-  navigation.navigate('Search');
-}, [navigation]);
+  const handleSearchPress = useCallback(() => {
+    navigation.navigate('Search');
+  }, [navigation]);
 
   const scrollTimeout = useRef(null);
   const handleScroll = useCallback((event) => {
@@ -342,7 +417,7 @@ const handleSearchPress = useCallback(() => {
       setInitialLoading(false);
       loadingFlags.current.initial = false;
     }
-  }, []);
+  }, [loadCategories, loadArticles, loadSections]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -364,17 +439,17 @@ const handleSearchPress = useCallback(() => {
     return () => {
       if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
     };
-  }, []);
+  }, [loadInitialData]);
 
   const memoizedArticleGroups = useMemo(() => {
-    return Array.from({ length: Math.ceil(articles.length / 4) }).map((_, groupIndex) => {
-      const startIndex = groupIndex * 4;
-      const endIndex = Math.min(startIndex + 4, articles.length);
+    return Array.from({ length: Math.ceil(articles.length / articlesPerGroup) }).map((_, groupIndex) => {
+      const startIndex = groupIndex * articlesPerGroup;
+      const endIndex = Math.min(startIndex + articlesPerGroup, articles.length);
       const groupArticles = articles.slice(startIndex, endIndex);
       const correspondingSection = allSections[groupIndex];
       return { groupIndex, groupArticles, correspondingSection };
     });
-  }, [articles, allSections]);
+  }, [articles, allSections, articlesPerGroup]);
 
   const renderArticleItem = useCallback(({ item }) => (
     <MemoizedArticleCard item={item} onPress={handleArticlePress} />
@@ -404,47 +479,63 @@ const handleSearchPress = useCallback(() => {
   }, [loadingMore, hasMoreArticles, hasMoreSections, loadArticles, loadSections]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" translucent={true} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }} edges={['left', 'right', 'bottom']}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" translucent={true} />
       
-      {/* Header wrapped in its own SafeAreaView */}
-      <SafeAreaView style={[styles.headerContainer, { paddingTop: insets.top }]} edges={['top']}>
-        <View style={styles.header}>
-          <View className="flex-row justify-between items-center">
-            <View className="flex-row items-center">
+      <SafeAreaView style={{ backgroundColor: '#F9FAFB', zIndex: 10, paddingTop: insets.top }} edges={['top']}>
+        <View style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <Image
-                source={require('../assets/logo.jpg')}
-                style={styles.headerImage}
+                source={require('../assets/icon_vks.png')}
+                style={{
+                  width: numColumns === 3 ? 56 : 48,
+                  height: numColumns === 3 ? 56 : 48,
+                  borderRadius: 9999
+                }}
               />
-              <View style={{ marginLeft: scale(6) }} className="flex flex-col h-fit leading-none">
-                <Text style={styles.headerTitle} className="font-sf-bold text-gray-900">Viện Kiểm Sát AI</Text>
-                <Text style={styles.headerSubtitle} className="font-sf-medium text-gray-900">{formattedDate}</Text>
+              <View style={{ marginLeft: 16 }}>
+                <Text style={[{
+                  fontSize: numColumns === 3 ? 20 : 16,
+                  fontWeight: 'bold',
+                  color: '#111827'
+                }, { fontFamily: FONT_CONFIG.bold }]}>
+                  VKS News
+                </Text>
+                <Text style={[{
+                  fontSize: numColumns === 3 ? 16 : 12,
+                  fontWeight: '500',
+                  color: '#111827'
+                }, { fontFamily: FONT_CONFIG.medium }]}>
+                  {formattedDate}
+                </Text>
               </View>
             </View>
             <TouchableOpacity
-              className="p-3 rounded-full bg-gray-200"
+              style={{
+                padding: 12,
+                borderRadius: 9999,
+                backgroundColor: '#E5E7EB'
+              }}
               onPress={handleSearchPress}
             >
-              <Search size={moderateScale(19)} color="#000" />
+              <Search size={numColumns === 3 ? 20 : 16} color="#000000" />
             </TouchableOpacity>
           </View>
         </View>
       </SafeAreaView>
 
-      {/* Scroll content */}
       <ScrollView
-        className="px-4"
+        style={{ paddingHorizontal: 12 }}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + verticalScale(20),
-        }}
+        contentContainerStyle={{ paddingBottom: 20 }}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor="#000"
-            colors={['#000']}
-            progressBackgroundColor="#f3f3f3"
+            tintColor="#000000"
+            colors={['#000000']}
+            progressBackgroundColor="#F3F4F6"
           />
         }
         onScroll={handleScroll}
@@ -456,14 +547,13 @@ const handleSearchPress = useCallback(() => {
         initialNumToRender={10}
         updateCellsBatchingPeriod={50}
       >
-        {/* Categories */}
         {categories.length > 1 && (
           <FlatList
             data={categories}
             horizontal
             showsHorizontalScrollIndicator={false}
-            className="my-4"
-            contentContainerStyle={{ paddingRight: scale(16) }}
+            style={{ marginVertical: 16 }}
+            contentContainerStyle={{ paddingRight: 16 }}
             renderItem={renderCategoryItem}
             keyExtractor={(item, index) => `category-${index}-${item}`}
             removeClippedSubviews={true}
@@ -473,86 +563,104 @@ const handleSearchPress = useCallback(() => {
           />
         )}
 
-        {/* Initial loading */}
         {initialLoading ? (
-          <View className="py-8 items-center">
-            <ActivityIndicator size="large" color="#000" />
-            <Text style={styles.summaryTime} className="font-sf-medium text-gray-600 mt-2">
+          <View style={{ paddingVertical: 32, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color="#000000" />
+            <Text style={[{
+              fontSize: numColumns === 3 ? 14 : 12,
+              color: '#4B5563',
+              marginTop: 8,
+              fontWeight: '500'
+            }, { fontFamily: FONT_CONFIG.medium }]}>
               Đang tải dữ liệu...
             </Text>
           </View>
         ) : (
           <>
-            {/* Articles Section */}
             {articles.length > 0 && (
-              <View className="mb-4">
-                <View className="flex-row justify-between items-center mb-2">
-                  <Text style={styles.sectionTitle} className="font-sf-bold text-gray-900">
+              <View style={{ marginBottom: 16 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: numColumns === 3 ? 24 : 16 }}>
+                  <Text style={[{
+                    fontSize: numColumns === 3 ? 28 : 20,
+                    fontWeight: 'bold',
+                    color: '#111827'
+                  }, { fontFamily: FONT_CONFIG.bold }]}>
                     Mới nhất
                   </Text>
-                  <TouchableOpacity>
-                    <Text style={styles.viewAllText} className="font-sf-medium text-gray-900 pl-2">Xem tất cả</Text>
+                  <TouchableOpacity onPress={() => navigation.navigate('Categories', { screen: 'CategoryMain' })}>
+                    <Text style={[{
+                      fontSize: numColumns === 3 ? 16 : 12,
+                      fontWeight: '500',
+                      color: '#111827',
+                      paddingLeft: 8
+                    }, { fontFamily: FONT_CONFIG.medium }]}>
+                      Xem tất cả
+                    </Text>
                   </TouchableOpacity>
                 </View>
 
-                {/* Render memoized article groups */}
                 {memoizedArticleGroups.map(({ groupIndex, groupArticles, correspondingSection }) => (
                   <View key={`group-${groupIndex}`}>
                     <FlatList
                       data={groupArticles}
                       keyExtractor={(item) => item._id || item.id}
-                      numColumns={2}
+                      numColumns={numColumns}
                       scrollEnabled={false}
-                      columnWrapperStyle={{ justifyContent: 'space-between' }}
-                      contentContainerStyle={{ gap: verticalScale(8), marginBottom: verticalScale(16) }}
+                      columnWrapperStyle={{ justifyContent: 'space-between', flexWrap: 'wrap' }}
+                      contentContainerStyle={{ gap: 8, marginBottom: 16 }}
                       renderItem={renderArticleItem}
-                      removeClippedSubviews={true}
-                      maxToRenderPerBatch={4}
+                      removeClippedSubviews
+                      maxToRenderPerBatch={articlesPerGroup}
                     />
                     {correspondingSection && (
-                      <View className="bg-gray-200 p-4 rounded-2xl mb-5">
-                        <View className="flex-row items-center mb-4">
-                          <View className="rounded-full overflow-hidden mr-1.5">
+                      <View style={{ backgroundColor: '#E5E7EB', padding: 16, borderRadius: 16, marginBottom: 20 }}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                          <View style={{ borderRadius: 9999, overflow: 'hidden', marginRight: 6 }}>
                             <LinearGradient
-                              colors={['#004b8d', '#00c6ff']}
+                              colors={['#004B8D', '#00C6FF']}
                               start={{ x: 0, y: 0 }}
                               end={{ x: 1, y: 0 }}
-                              className="px-2.5 py-0.5"
+                              style={{ paddingHorizontal: 8, paddingVertical: 6 }}
                             >
-                              <View className="flex-row items-center justify-center gap-1.5">
-                                <Clock size={moderateScale(16)} color="#fff" strokeWidth={2} />
-                                <Text style={styles.summaryTime} className="font-sf-medium text-white">
+                              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                <Clock size={numColumns === 3 ? 18 : 16} color="#FFFFFF" />
+                                <Text style={[{
+                                  fontSize: numColumns === 3 ? 14 : 12,
+                                  color: '#FFFFFF',
+                                  fontWeight: '500'
+                                }, { fontFamily: FONT_CONFIG.medium }]}>
                                   {formatTimeAgo(correspondingSection.createdAt)}
                                 </Text>
                               </View>
                             </LinearGradient>
                           </View>
-                          <Text style={styles.summaryTitle} className="font-sf-bold text-black ml-2">
+                          <Text style={[{
+                            fontSize: numColumns === 3 ? 24 : 20,
+                            fontWeight: 'bold',
+                            color: '#000000',
+                            marginLeft: 8
+                          }, { fontFamily: FONT_CONFIG.bold }]}>
                             Tóm tắt
                           </Text>
-                            {/* <View className="ml-auto">
-                              <TouchableOpacity
-                                onPress={handleAudioPress}
-                                className="bg-black rounded-full p-2"
-                                disabled={allSections.length === 0}
-                              >
-                                <AudioLines size={moderateScale(20)} color="#ffffff" strokeWidth={2} />
-                              </TouchableOpacity>
-                            </View> */}
                         </View>
                         {correspondingSection.topics && correspondingSection.topics.length > 0 ? (
                           correspondingSection.topics.map((topic, topicIndex) => (
                             <View key={topic._id || topicIndex}>
-                              <View className="flex-row items-stretch mb-5">
-                                <View style={styles.gradientLine}>
+                              <View style={{ flexDirection: 'row', alignItems: 'stretch', marginBottom: 20 }}>
+                                <View style={{ width: 5, borderRadius: 2, overflow: 'hidden', marginRight: 10, marginVertical: 0 }}>
                                   <LinearGradient
-                                    colors={['#3b82f6', '#9333ea', '#f43f5e']}
+                                    colors={['#3B82F6', '#9333EA', '#F43F5E']}
                                     start={{ x: 0, y: 0 }}
                                     end={{ x: 0, y: 1 }}
                                     style={{ flex: 1 }}
                                   />
                                 </View>
-                                <Text style={styles.sectionSubtitle} className="font-sf-bold text-black flex-1">
+                                <Text style={[{
+                                  fontSize: numColumns === 3 ? 28 : 20,
+                                  fontWeight: 'bold',
+                                  color: '#000000',
+                                  flex: 1
+                                }, { fontFamily: FONT_CONFIG.bold }]}>
                                   {topic.title}
                                 </Text>
                               </View>
@@ -562,16 +670,21 @@ const handleSearchPress = useCallback(() => {
                                   article={article}
                                   showDivider={articleIndex < topic.articles.length - 1}
                                   onPress={handleArticlePress}
+                                  numColumns={numColumns}
                                 />
                               ))}
                               {topicIndex < correspondingSection.topics.length - 1 && (
-                                <View style={styles.sectionDivider} />
+                                <View style={{ height: 3, borderRadius: 1.5, backgroundColor: '#FFFFFF', width: '100%', marginVertical: 20 }} />
                               )}
                             </View>
                           ))
                         ) : (
-                          <View className="py-4 items-center">
-                            <Text style={styles.summaryTime} className="font-sf-medium text-gray-600">
+                          <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+                            <Text style={[{
+                              fontSize: numColumns === 3 ? 14 : 12,
+                              color: '#4B5563',
+                              fontWeight: '500'
+                            }, { fontFamily: FONT_CONFIG.medium }]}>
                               Chưa có dữ liệu tóm tắt
                             </Text>
                           </View>
@@ -583,16 +696,25 @@ const handleSearchPress = useCallback(() => {
               </View>
             )}
             {loadingMore && (
-              <View className="py-4 items-center">
-                <ActivityIndicator size="large" color="#000" />
-                <Text style={styles.summaryTime} className="font-sf-medium text-gray-600 mt-2">
+              <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+                <ActivityIndicator size="large" color="#000000" />
+                <Text style={[{
+                  fontSize: numColumns === 3 ? 14 : 12,
+                  color: '#4B5563',
+                  marginTop: 8,
+                  fontWeight: '500'
+                }, { fontFamily: FONT_CONFIG.medium }]}>
                   Đang tải thêm nội dung...
                 </Text>
               </View>
             )}
             {!hasMoreArticles && !hasMoreSections && articles.length > 0 && (
-              <View className="py-4 items-center">
-                <Text style={styles.summaryTime} className="font-sf-medium text-gray-600">
+              <View style={{ paddingVertical: 16, alignItems: 'center' }}>
+                <Text style={[{
+                  fontSize: numColumns === 3 ? 14 : 12,
+                  color: '#4B5563',
+                  fontWeight: '500'
+                }, { fontFamily: FONT_CONFIG.medium }]}>
                   Đã hiển thị tất cả nội dung
                 </Text>
               </View>
@@ -601,11 +723,9 @@ const handleSearchPress = useCallback(() => {
         )}
       </ScrollView>
 
-      {/* Text Reader */}
       {showReader && (
         <View
-          className="absolute left-0 right-0 bottom-0 z-50"
-          style={{ paddingBottom: insets.bottom }}
+          style={{ position: 'absolute', left: 0, right: 0, bottom: 0, zIndex: 50, paddingBottom: insets.bottom }}
           pointerEvents="box-none"
         >
           <TextReader
@@ -615,138 +735,16 @@ const handleSearchPress = useCallback(() => {
         </View>
       )}
 
-      {/* Bottom Navigation (Placeholder) */}
       <View
-        style={[styles.bottomNav, { paddingBottom: insets.bottom }]}
+        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFFFFF', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center', zIndex: 100, paddingBottom: insets.bottom }}
       >
-        <Text style={styles.bottomNavText}>Bottom Navigation Placeholder</Text>
+        <Text style={[{
+          fontSize: numColumns === 3 ? 16 : 12,
+          color: '#000000'
+        }, { fontFamily: FONT_CONFIG.regular }]}>
+          Bottom Navigation Placeholder
+        </Text>
       </View>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  headerContainer: {
-    backgroundColor: '#f9fafb',
-    zIndex: 10,
-  },
-  header: {
-    paddingHorizontal: scale(12),
-    paddingVertical: verticalScale(6),
-  },
-  headerImage: {
-    width: scale(40),
-    height: scale(40),
-    borderRadius: scale(20),
-  },
-  headerTitle: {
-    fontSize: moderateScale(14),
-    lineHeight: scale(22),
-  },
-  headerSubtitle: {
-    fontSize: moderateScale(12),
-    lineHeight: scale(16),
-  },
-  categoryText: {
-    fontSize: moderateScale(12),
-  },
-  sectionTitle: {
-    fontSize: moderateScale(23),
-  },
-  viewAllText: {
-    fontSize: moderateScale(12),
-    paddingLeft: scale(8),
-  },
-  articleImage: {
-    width: '100%',
-    height: verticalScale(90),
-    borderRadius: scale(8),
-    marginBottom: verticalScale(4),
-    shadowColor: 'rgba(27, 31, 35, 0.15)',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 1,
-    shadowRadius: 1,
-    elevation: 1,
-    backgroundColor: '#fff',
-    marginBottom: scale(8),
-  },
-  articleTitle: {
-    fontSize: moderateScale(14),
-    lineHeight: scale(16),
-    marginBottom: scale(5),
-  },
-  sourceText: {
-    fontSize: moderateScale(10),
-  },
-  timeText: {
-    fontSize: moderateScale(10),
-  },
-  summaryTime: {
-    fontSize: moderateScale(11),
-  },
-  summaryTitle: {
-    fontSize: moderateScale(19),
-  },
-  gradientLine: {
-    width: scale(5),
-    borderRadius: scale(2),
-    overflow: 'hidden',
-    marginRight: scale(10),
-    marginTop: verticalScale(0),
-    marginBottom: verticalScale(0),
-  },
-  sectionSubtitle: {
-    fontSize: moderateScale(19),
-    flex: 1,
-  },
-  newsText: {
-    fontSize: moderateScale(15),
-  },
-  summaryPreview: {
-    fontSize: moderateScale(13),
-    lineHeight: moderateScale(18),
-  },
-  moreText: {
-    fontSize: moderateScale(11),
-    fontStyle: 'italic',
-  },
-  newsImage: {
-    width: scale(80),
-    height: scale(80),
-    borderRadius: scale(8),
-  },
-  divider: {
-    marginTop: verticalScale(12),
-    height: verticalScale(1),
-    backgroundColor: '#fff',
-    width: '100%',
-  },
-  sectionDivider: {
-    height: verticalScale(3),
-    borderRadius: scale(1.5),
-    backgroundColor: '#fff',
-    width: '100%',
-    marginVertical: verticalScale(20),
-  },
-  bottomNav: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#fff',
-    paddingVertical: verticalScale(10),
-    borderTopWidth: 1,
-    borderTopColor: '#e5e7eb',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 100,
-  },
-  bottomNavText: {
-    fontSize: moderateScale(14),
-    color: '#000',
-  },
-});

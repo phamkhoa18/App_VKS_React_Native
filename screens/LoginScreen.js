@@ -17,7 +17,7 @@ import { Eye, EyeOff, ChevronLeft } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '../services/apiService';
-
+import { useUser } from '../context/UserContext';
 // ✅ FONT CONFIGURATION - SỬ DỤNG FONTS ĐÃ LOAD TRONG APP.JS
 const FONT_CONFIG = {
   black: 'SFPro-Black',
@@ -34,6 +34,7 @@ export default function LoginScreen({ navigation }) {
   const [showPassword, setShowPassword] = useState(false);
   const [showErrorModal, setShowErrorModal] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  const { saveUser } = useUser();
 
   // ✅ Memoized form handler
   const handleChange = useCallback((key, value) => {
@@ -96,8 +97,8 @@ const handleLogin = useCallback(async () => {
         favoriteTopics: 0,
       };
 
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-      console.log('✅ User data saved to AsyncStorage:', userData);
+      await saveUser(userData);
+      console.log('✅ User saved via context:', userData);
 
       setLoading(false);
       
@@ -150,17 +151,6 @@ const handleLogin = useCallback(async () => {
   }
 }, [validateForm, form, navigation]);
 
-  // ✅ Social login handlers
-  const handleGoogleLogin = useCallback(() => {
-    console.log('✅ Google login initiated');
-    // Implement Google login
-  }, []);
-
-  const handleFacebookLogin = useCallback(() => {
-    console.log('✅ Facebook login initiated');
-    // Implement Facebook login
-  }, []);
-
   // ✅ Memoized scroll content style
   const scrollContentStyle = useMemo(() => ({
     paddingHorizontal: 16,
@@ -171,7 +161,7 @@ const handleLogin = useCallback(async () => {
     <SafeAreaView
       style={[
         styles.container,
-        { paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }
+        { paddingTop: 20 }
       ]}
     >
       <ScrollView contentContainerStyle={scrollContentStyle}>
@@ -349,7 +339,6 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 24,
     marginBottom: 20,
   },
   backButton: {

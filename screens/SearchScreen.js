@@ -1,4 +1,3 @@
-// screens/SearchScreen.js
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   View,
@@ -8,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   FlatList,
-  StyleSheet,
   StatusBar,
   ScrollView,
 } from 'react-native';
@@ -21,11 +19,13 @@ import {
   SlidersHorizontal 
 } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { moderateScale, scale, verticalScale } from 'react-native-size-matters';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Dimensions } from 'react-native';
 
 import { articlesAPI, CategoriesAPI } from '../services/apiService';
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
 // Constants
 const RECENT_SEARCHES_KEY = '@recent_searches';
@@ -43,31 +43,22 @@ const DEFAULT_SUGGESTIONS = [
 
 // 20 trending searches liên quan đến các danh mục VKS
 const ALL_TRENDING_SEARCHES = [
-  // Ngành kiểm sát 24/7
   'Tin tức kiểm sát mới nhất',
   'Hoạt động thanh tra VKS',
   'Giám sát thi hành pháp luật',
   'Quyết định kiểm sát quan trọng',
-  
-  // Văn bản trong ngành VKS
   'Văn bản VKS mới ban hành',
   'Nghị quyết ngành kiểm sát',
   'Chỉ thị VKS',
   'Hướng dẫn thực hiện VKS',
-  
-  // An ninh trật tự
   'Tình hình an ninh quốc gia',
   'Phòng chống tội phạm',
   'Trật tự xã hội',
   'An toàn cộng đồng',
-  
-  // Chính sách pháp luật mới
   'Luật sửa đổi bổ sung 2024',
   'Chính sách pháp luật mới',
   'Văn bản quy phạm pháp luật',
   'Thay đổi quy định pháp lý',
-  
-  // Bản án, án lệ
   'Bản án tiêu biểu VKS',
   'Án lệ tòa án tối cao',
   'Phán quyết quan trọng',
@@ -181,7 +172,6 @@ export default function SearchScreen() {
         const apiSuggestions = result.data || [];
         setSuggestions(apiSuggestions);
         
-        // Combine API suggestions with filtered default suggestions
         const q = searchQuery.toLowerCase();
         const filteredDefault = DEFAULT_SUGGESTIONS.filter(s => 
           s.toLowerCase().includes(q)
@@ -193,7 +183,6 @@ export default function SearchScreen() {
       }
     } catch (error) {
       console.error('❌ Error getting suggestions:', error);
-      // Fallback to default filtering
       const q = searchQuery.toLowerCase();
       setFilteredSuggestions(
         DEFAULT_SUGGESTIONS.filter(s => s.toLowerCase().includes(q))
@@ -219,10 +208,8 @@ export default function SearchScreen() {
     
     const trimmedQuery = searchQuery.trim();
     
-    // Save to recent searches
     saveToRecentSearches(trimmedQuery);
     
-    // Navigate to SearchResult with parameters
     navigation.navigate('SearchResult', {
       query: trimmedQuery,
       type: searchType,
@@ -306,7 +293,7 @@ export default function SearchScreen() {
     const parts = text.split(new RegExp(`(${searchQuery})`, 'gi'));
     return parts.map((part, i) =>
       part.toLowerCase() === searchQuery.toLowerCase() ? (
-        <Text key={i} className="font-sf-bold text-blue-600">{part}</Text>
+        <Text key={i} style={{ fontWeight: 'bold', color: '#2563EB' }}>{part}</Text>
       ) : (
         <Text key={i}>{part}</Text>
       )
@@ -317,10 +304,17 @@ export default function SearchScreen() {
   const renderSuggestion = useCallback(({ item }) => (
     <TouchableOpacity
       onPress={() => handleSelectSuggestion(item)}
-      className="flex-row items-center py-2.5 border-b border-gray-200 gap-1.5"
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: SCREEN_WIDTH < 768 ? 10 : 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
+        gap: 6
+      }}
     >
-      <Search size={moderateScale(16)} color="#888" strokeWidth={2} />
-      <Text style={styles.suggestionText} className="font-sf-regular text-gray-800 flex-1">
+      <Search size={SCREEN_WIDTH < 768 ? 16 : 18} color="#6B7280" />
+      <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 14 : 16, color: '#1F2937', flex: 1 }}>
         {highlightMatch(typeof item === 'string' ? item : item.title, query)}
       </Text>
     </TouchableOpacity>
@@ -330,17 +324,24 @@ export default function SearchScreen() {
   const renderRecentSearch = useCallback(({ item }) => (
     <TouchableOpacity
       onPress={() => handleSelectSuggestion(item)}
-      className="flex-row items-center py-2.5 border-b border-gray-200 gap-1.5"
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: SCREEN_WIDTH < 768 ? 10 : 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
+        gap: 6
+      }}
     >
-      <History size={moderateScale(16)} color="#888" strokeWidth={2} />
-      <Text style={styles.suggestionText} className="font-sf-regular text-gray-800 flex-1">
+      <History size={SCREEN_WIDTH < 768 ? 16 : 18} color="#6B7280" />
+      <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 14 : 16, color: '#1F2937', flex: 1 }}>
         {item}
       </Text>
       <TouchableOpacity
         onPress={() => setRecentSearches(prev => prev.filter(search => search !== item))}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
-        <X size={moderateScale(14)} color="#999" />
+        <X size={SCREEN_WIDTH < 768 ? 14 : 16} color="#6B7280" />
       </TouchableOpacity>
     </TouchableOpacity>
   ), [handleSelectSuggestion]);
@@ -349,68 +350,86 @@ export default function SearchScreen() {
   const renderTrendingSearch = useCallback(({ item }) => (
     <TouchableOpacity
       onPress={() => handleSelectSuggestion(item)}
-      className="flex-row items-center py-2.5 border-b border-gray-200 gap-1.5"
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: SCREEN_WIDTH < 768 ? 10 : 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#E5E7EB',
+        gap: 6
+      }}
     >
-      <TrendingUp size={moderateScale(16)} color="#EF4444" strokeWidth={2} />
-      <Text style={styles.suggestionText} className="font-sf-regular text-gray-800 flex-1">
+      <TrendingUp size={SCREEN_WIDTH < 768 ? 16 : 18} color="#EF4444" />
+      <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 14 : 16, color: '#1F2937', flex: 1 }}>
         {item}
       </Text>
     </TouchableOpacity>
   ), [handleSelectSuggestion]);
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f9fafb" />
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F9FAFB' }}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F9FAFB" />
       <KeyboardAvoidingView
-        style={styles.container}
+        style={{ flex: 1, paddingHorizontal: 12 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       >
         {/* Header */}
-        <View style={styles.header}>
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center">
+        <View style={{ marginBottom: 12, paddingTop: 8 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
               <TouchableOpacity
                 onPress={() => navigation.goBack()}
-                className="p-2 rounded-full bg-gray-100"
+                style={{
+                  padding: 8,
+                  borderRadius: 9999,
+                  backgroundColor: '#F3F4F6'
+                }}
               >
-                <ArrowLeft size={moderateScale(18)} color="#333" strokeWidth={2} />
+                <ArrowLeft size={SCREEN_WIDTH < 768 ? 18 : 20} color="#374151" />
               </TouchableOpacity>
-              <Text style={styles.headerTitle} className="font-sf-bold text-gray-900 ml-2">
+              <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 18 : 20, fontWeight: 'bold', color: '#111827', marginLeft: 8 }}>
                 Tìm kiếm
               </Text>
             </View>
             
-            {/* Filter Button */}
             <TouchableOpacity
               onPress={() => setShowFilters(!showFilters)}
-              className={`p-2 rounded-full ${
-                activeFilter !== 'all' || selectedCategory ? 'bg-blue-500' : 'bg-gray-100'
-              }`}
+              style={{
+                padding: 8,
+                borderRadius: 9999,
+                backgroundColor: activeFilter !== 'all' || selectedCategory ? '#3B82F6' : '#F3F4F6'
+              }}
             >
               <SlidersHorizontal 
-                size={moderateScale(18)} 
-                color={activeFilter !== 'all' || selectedCategory ? '#FFF' : '#333'} 
+                size={SCREEN_WIDTH < 768 ? 18 : 20} 
+                color={activeFilter !== 'all' || selectedCategory ? '#FFFFFF' : '#374151'} 
               />
             </TouchableOpacity>
           </View>
         </View>
 
         {/* Search Box */}
-        <View style={styles.searchContainer}>
+        <View style={{ marginBottom: 12, position: 'relative' }}>
           <TextInput
             ref={inputRef}
             placeholder="Bạn muốn tìm gì?"
-            placeholderTextColor="#999"
-            className="bg-gray-100 px-10 py-2.5 rounded-xl font-sf-medium text-gray-800"
-            style={styles.textInput}
+            placeholderTextColor="#6B7280"
+            style={{
+              backgroundColor: '#F3F4F6',
+              paddingHorizontal: 40,
+              paddingVertical: SCREEN_WIDTH < 768 ? 10 : 12,
+              borderRadius: 12,
+              fontSize: SCREEN_WIDTH < 768 ? 14 : 16,
+              color: '#1F2937'
+            }}
             value={query}
             onChangeText={handleSearchChange}
             onSubmitEditing={handleSearch}
           />
           <Search
-            size={moderateScale(18)}
-            color="#999"
-            style={styles.searchIcon}
+            size={SCREEN_WIDTH < 768 ? 18 : 20}
+            color="#6B7280"
+            style={{ position: 'absolute', left: 10, top: SCREEN_WIDTH < 768 ? 10 : 12 }}
           />
           {query.length > 0 && (
             <TouchableOpacity
@@ -419,22 +438,28 @@ export default function SearchScreen() {
                 setSuggestions([]);
                 setFilteredSuggestions(DEFAULT_SUGGESTIONS);
               }}
-              style={styles.clearIcon}
+              style={{ position: 'absolute', right: 10, top: SCREEN_WIDTH < 768 ? 10 : 12 }}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <X size={moderateScale(16)} color="#999" />
+              <X size={SCREEN_WIDTH < 768 ? 16 : 18} color="#6B7280" />
             </TouchableOpacity>
           )}
         </View>
 
         {/* Filters Panel */}
         {showFilters && (
-          <View style={styles.filtersPanel}>
-            {/* Search Type Filters */}
+          <View style={{
+            marginBottom: 12,
+            padding: 12,
+            backgroundColor: '#FFFFFF',
+            borderRadius: 12
+          }}>
             <View>
-              <Text style={styles.filterLabel} className="font-sf-medium text-gray-600 mb-2">Tìm kiếm theo:</Text>
+              <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 12 : 14, color: '#4B5563', marginBottom: 8, fontWeight: '500' }}>
+                Tìm kiếm theo:
+              </Text>
               <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                <View className="flex-row space-x-2">
+                <View style={{ flexDirection: 'row', gap: 8 }}>
                   {[
                     { key: 'all', label: 'Tất cả' },
                     { key: 'title', label: 'Tiêu đề' },
@@ -444,17 +469,18 @@ export default function SearchScreen() {
                     <TouchableOpacity
                       key={filter.key}
                       onPress={() => handleFilterChange(filter.key)}
-                      className={`px-3 py-1.5 rounded-full ${
-                        activeFilter === filter.key 
-                          ? 'bg-blue-500' 
-                          : 'bg-gray-200'
-                      }`}
+                      style={{
+                        paddingHorizontal: 12,
+                        paddingVertical: 6,
+                        borderRadius: 9999,
+                        backgroundColor: activeFilter === filter.key ? '#3B82F6' : '#E5E7EB'
+                      }}
                     >
-                      <Text className={`font-sf-medium text-sm ${
-                        activeFilter === filter.key 
-                          ? 'text-white' 
-                          : 'text-gray-700'
-                      }`}>
+                      <Text style={{
+                        fontSize: SCREEN_WIDTH < 768 ? 12 : 14,
+                        color: activeFilter === filter.key ? '#FFFFFF' : '#374151',
+                        fontWeight: '500'
+                      }}>
                         {filter.label}
                       </Text>
                     </TouchableOpacity>
@@ -463,29 +489,31 @@ export default function SearchScreen() {
               </ScrollView>
             </View>
 
-            {/* Categories Filter */}
             {categories.length > 0 && (
-              <View style={{ marginTop: verticalScale(12) }}>
-                <Text style={styles.filterLabel} className="font-sf-medium text-gray-600 mb-2">Danh mục:</Text>
+              <View style={{ marginTop: 12 }}>
+                <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 12 : 14, color: '#4B5563', marginBottom: 8, fontWeight: '500' }}>
+                  Danh mục:
+                </Text>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  <View className="flex-row space-x-2">
+                  <View style={{ flexDirection: 'row', gap: 8 }}>
                     {categories.map((category) => {
                       const categoryName = category.name || category.title || category;
                       return (
                         <TouchableOpacity
                           key={category._id || categoryName}
                           onPress={() => handleCategorySelect(categoryName)}
-                          className={`px-3 py-1.5 rounded-full ${
-                            selectedCategory === categoryName 
-                              ? 'bg-green-500' 
-                              : 'bg-gray-200'
-                          }`}
+                          style={{
+                            paddingHorizontal: 12,
+                            paddingVertical: 6,
+                            borderRadius: 9999,
+                            backgroundColor: selectedCategory === categoryName ? '#10B981' : '#E5E7EB'
+                          }}
                         >
-                          <Text className={`font-sf-medium text-sm ${
-                            selectedCategory === categoryName 
-                              ? 'text-white' 
-                              : 'text-gray-700'
-                          }`}>
+                          <Text style={{
+                            fontSize: SCREEN_WIDTH < 768 ? 12 : 14,
+                            color: selectedCategory === categoryName ? '#FFFFFF' : '#374151',
+                            fontWeight: '500'
+                          }}>
                             {categoryName}
                           </Text>
                         </TouchableOpacity>
@@ -516,19 +544,19 @@ export default function SearchScreen() {
           ListHeaderComponent={() => {
             if (query.length >= 2) {
               return (
-                <Text style={styles.suggestionHeader} className="font-sf-medium text-gray-500 mb-1.5">
+                <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 12 : 14, color: '#6B7280', marginBottom: 6, fontWeight: '500' }}>
                   Gợi ý tìm kiếm:
                 </Text>
               );
             } else if (recentSearches.length > 0) {
               return (
                 <View>
-                  <View className="flex-row items-center justify-between mb-1.5">
-                    <Text style={styles.suggestionHeader} className="font-sf-medium text-gray-500">
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                    <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 12 : 14, color: '#6B7280', fontWeight: '500' }}>
                       Tìm kiếm gần đây:
                     </Text>
                     <TouchableOpacity onPress={clearRecentSearches}>
-                      <Text style={styles.clearButton} className="font-sf-medium text-blue-500">
+                      <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 12 : 14, color: '#3B82F6', fontWeight: '500' }}>
                         Xóa tất cả
                       </Text>
                     </TouchableOpacity>
@@ -537,15 +565,15 @@ export default function SearchScreen() {
               );
             } else {
               return (
-                <View className="flex-row items-center justify-between mb-1.5">
-                  <Text style={styles.suggestionHeader} className="font-sf-medium text-gray-500">
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                  <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 12 : 14, color: '#6B7280', fontWeight: '500' }}>
                     Tìm kiếm phổ biến:
                   </Text>
                   <TouchableOpacity 
                     onPress={() => setCurrentTrendingSearches(getRandomTrendingSearches())}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                   >
-                    <Text style={styles.clearButton} className="font-sf-medium text-green-500">
+                    <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 12 : 14, color: '#10B981', fontWeight: '500' }}>
                       Làm mới
                     </Text>
                   </TouchableOpacity>
@@ -554,73 +582,13 @@ export default function SearchScreen() {
             }
           }}
           ListEmptyComponent={
-            <Text style={styles.emptyText} className="font-sf-medium text-gray-400 text-center mt-6">
+            <Text style={{ fontSize: SCREEN_WIDTH < 768 ? 14 : 16, color: '#9CA3AF', textAlign: 'center', marginTop: 24 }}>
               Không có gợi ý phù hợp
             </Text>
           }
-          contentContainerStyle={styles.flatListContent}
+          contentContainerStyle={{ paddingHorizontal: 12 }}
         />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-  },
-  container: {
-    flex: 1,
-    paddingHorizontal: scale(12),
-    backgroundColor: '#f9fafb',
-  },
-  header: {
-    marginBottom: verticalScale(12),
-    paddingTop: verticalScale(8),
-  },
-  headerTitle: {
-    fontSize: moderateScale(18),
-  },
-  searchContainer: {
-    marginBottom: verticalScale(12),
-    position: 'relative',
-  },
-  textInput: {
-    fontSize: moderateScale(14),
-  },
-  searchIcon: {
-    position: 'absolute',
-    left: scale(10),
-    top: verticalScale(10),
-  },
-  clearIcon: {
-    position: 'absolute',
-    right: scale(10),
-    top: verticalScale(10),
-  },
-  filtersPanel: {
-    marginBottom: verticalScale(12),
-    padding: scale(12),
-    backgroundColor: 'white',
-    borderRadius: scale(12),
-  },
-  filterLabel: {
-    fontSize: moderateScale(12),
-  },
-  suggestionHeader: {
-    fontSize: moderateScale(12),
-  },
-  clearButton: {
-    fontSize: moderateScale(12),
-  },
-  suggestionText: {
-    fontSize: moderateScale(14),
-  },
-  emptyText: {
-    fontSize: moderateScale(14),
-  },
-  flatListContent: {
-    paddingHorizontal: scale(12),
-  },
-});
