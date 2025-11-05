@@ -17,7 +17,7 @@ export default {
     updates: {
       url: "https://u.expo.dev/1690739a-3e5c-46aa-bf91-32b40856c25b",
       enabled: true,
-      checkAutomatically: "NEVER",
+      checkAutomatically: "ON_LOAD",
       fallbackToCacheTimeout: 3000,
     },
 
