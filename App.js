@@ -4,10 +4,9 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { useFonts } from 'expo-font';
-import { Home, Bell, User, Search, MessageCircle, Book } from 'lucide-react-native';
+import { Home, Bell, User, Search, MessageCircle, Book, Newspaper } from 'lucide-react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-
 import "./global.css";
 import { LinearGradient } from 'expo-linear-gradient';
 import HomeScreen from './screens/HomeScreen';
@@ -29,6 +28,8 @@ import InfoScreen from './screens/InfoScreen';
 import TopicScreen from './screens/Account/TopicScreen';
 import SettingsScreen from './screens/Account/SettingScreen';
 import NoteBookScreen from './screens/NoteBookScreen';
+import InfoNeedScreen from './screens/InfoNeedScreen';
+import InfoNeedDetailScreen from './screens/InfoNeedDetailScreen';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
@@ -65,6 +66,8 @@ function NoteBookStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="NoteBookMain" component={NoteBookScreen} />
       <Stack.Screen name="Info" component={InfoScreen} />
+      <Stack.Screen name="InfoNeed" component={InfoNeedScreen} />
+      <Stack.Screen name="InfoNeedDetail" component={InfoNeedDetailScreen} />
     </Stack.Navigator>
   );
 }
@@ -208,7 +211,7 @@ function CustomTabBar({ state, descriptors, navigation }) {
             LucideIcon = Home;
             break;
           case 'Categories':
-            LucideIcon = Search;
+            LucideIcon = Newspaper;
             break;
           case 'Notifications':
             LucideIcon = Book;

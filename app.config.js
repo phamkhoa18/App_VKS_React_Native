@@ -4,7 +4,7 @@ export default {
   expo: {
     name: "VKS News",
     slug: "vien-kiem-sat-ai",
-    version: "1.0.4", // ⚡ tăng khi build bản mới
+    version: "1.0.6", // ⚡ tăng khi build bản mới
     orientation: "portrait",
     icon: "./assets/icon_vks.jpg",
     userInterfaceStyle: "light",
@@ -21,6 +21,12 @@ export default {
       fallbackToCacheTimeout: 3000,
     },
 
+    splash: {
+      // image: "./assets/splash-icon_vks.png",
+      // resizeMode: "cover",
+      backgroundColor: "#006cda",
+    },
+
     ios: {
       supportsTablet: true,
       bundleIdentifier: "com.vksnews.app",
@@ -32,7 +38,7 @@ export default {
       versionCode: 5, // ⚡ tăng khi build Android
       usesCleartextTraffic: true,
       adaptiveIcon: {
-        foregroundImage: "./assets/splash-icon_vks.png",
+        // foregroundImage: "./assets/splash-icon_vks.png",
         backgroundColor: "#006cda",
       },
     },

@@ -4,7 +4,6 @@ import {
   Text,
   Image,
   ScrollView,
-  SafeAreaView,
   Animated,
   TouchableOpacity,
   StyleSheet,
@@ -34,6 +33,7 @@ import {
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useHideTabBar } from '../hooks/useHideTabBar';
 import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { scaleSize, scaleFont, spacing } from '../utils/responsive';
 import { articlesAPI } from '../services/apiService';
 import TextReader from '../components/TextReader';
@@ -841,7 +841,6 @@ export default function ArticleDetailScreen() {
             right: 0,
             zIndex: 1000,
             elevation: 1000,
-            paddingTop: insets.top,
             backgroundColor: 'transparent',
           }}
           edges={['top']} // Chỉ áp dụng safe area cho cạnh trên

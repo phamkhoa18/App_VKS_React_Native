@@ -347,7 +347,7 @@ export default function SimpleGoogleTextReader({
       <TouchableOpacity onPress={toggleSpeech} disabled={isLoading} style={{ opacity: isLoading ? 0.5 : 1 }}>
         <View className="relative">
           <Image
-            source={require('../assets/icon.png')}
+            source={require('../assets/icon_vks.png')}
             className="w-9 h-9 rounded-md"
           />
           <View className="absolute inset-0 rounded-md bg-black/30 flex items-center justify-center">

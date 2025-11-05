@@ -42,7 +42,7 @@ export default function NoteBookScreen() {
       description: 'Hướng dẫn, quy trình và kiến thức',
       color: '#AF52DE',
       lightBg: '#FAF5FF',
-      link: 'https://hpu.vn/ksv-can-biet',
+      router: 'InfoNeed'
     },
     {
       id: 'documents',
@@ -93,8 +93,9 @@ export default function NoteBookScreen() {
 
         {/* Tiêu đề ở giữa */}
         <Text
-          className="text-xl font-sf-bold text-black text-center"
+          className="text-xl text-black text-center"
           numberOfLines={1}
+          style={{ fontFamily: FONT_CONFIG.bold }}
         >
           Sổ tay kiểm sát
         </Text>

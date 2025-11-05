@@ -97,9 +97,9 @@ const MemoizedArticleCard = React.memo(({ item, onPress }) => (
         source={item.image ? { uri: item.image } : require('../assets/news.jpg')}
         style={{
           width: '100%',
-          height: numColumns === 3 ? 150 : 90,
-          borderRadius: 8,
-          marginBottom: 8,
+          height: numColumns === 3 ? 170 : 110,
+          borderRadius: 10,
+          marginBottom: 10,
           backgroundColor: '#FFFFFF'
         }}
         resizeMode="cover"
@@ -486,15 +486,20 @@ export default function HomeScreen() {
         <View style={{ paddingHorizontal: 12, paddingVertical: 6 }}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Image
+              {/* <Image
                 source={require('../assets/icon_vks.png')}
                 style={{
                   width: numColumns === 3 ? 56 : 48,
                   height: numColumns === 3 ? 56 : 48,
                   borderRadius: 9999
                 }}
-              />
-              <View style={{ marginLeft: 16 }}>
+              /> */}
+
+              <LinearGradient colors={['#007AFF', '#00C6FF']} style={{ width: 45, height: 45, borderRadius: 9999, overflow: 'hidden' }}>
+                <Image source={require('../assets/icon_app.png')} style={{ width: 45, height: 45 }} resizeMode="contain" />
+              </LinearGradient>
+
+              <View style={{ marginLeft: 12 }}>
                 <Text style={[{
                   fontSize: numColumns === 3 ? 20 : 16,
                   fontWeight: 'bold',
@@ -734,17 +739,6 @@ export default function HomeScreen() {
           />
         </View>
       )}
-
-      <View
-        style={{ position: 'absolute', bottom: 0, left: 0, right: 0, backgroundColor: '#FFFFFF', paddingVertical: 10, borderTopWidth: 1, borderTopColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center', zIndex: 100, paddingBottom: insets.bottom }}
-      >
-        <Text style={[{
-          fontSize: numColumns === 3 ? 16 : 12,
-          color: '#000000'
-        }, { fontFamily: FONT_CONFIG.regular }]}>
-          Bottom Navigation Placeholder
-        </Text>
-      </View>
     </SafeAreaView>
   );
 }
