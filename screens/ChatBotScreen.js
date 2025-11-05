@@ -197,6 +197,7 @@ export default function LawChatBotScreen({ navigation }) {
   const [connectionStatus, setConnectionStatus] = useState('connected');
   const [isLoading, setIsLoading] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
   const scrollViewRef = useRef(null);
   const inputRef = useRef(null);
@@ -221,15 +222,20 @@ export default function LawChatBotScreen({ navigation }) {
 
   // Keyboard + Scroll
   useEffect(() => {
-    const show = Keyboard.addListener('keyboardDidShow', () => {
+    const show = Keyboard.addListener('keyboardDidShow', (e) => {
       setKeyboardVisible(true);
+      setKeyboardHeight(e.endCoordinates.height);
       setShowQuickActions(false);
       Animated.timing(quickActionsAnim, { toValue: 0, duration: 200, useNativeDriver: true }).start();
-      setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
+      // Scroll về cuối khi keyboard hiện
+      setTimeout(() => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
+      }, 300);
     });
 
     const hide = Keyboard.addListener('keyboardDidHide', () => {
       setKeyboardVisible(false);
+      setKeyboardHeight(0);
       if (messages.length <= 1) {
         setShowQuickActions(true);
         Animated.timing(quickActionsAnim, { toValue: 1, duration: 300, useNativeDriver: true }).start();
@@ -240,6 +246,7 @@ export default function LawChatBotScreen({ navigation }) {
   }, [messages.length]);
 
   useEffect(() => {
+    // Scroll khi có tin nhắn mới
     setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 100);
   }, [messages]);
 
@@ -301,6 +308,9 @@ export default function LawChatBotScreen({ navigation }) {
     startTyping();
     startThinkingAnimation();
 
+    // Giữ focus vào input và không dismiss keyboard
+    inputRef.current?.focus();
+
     const botMsgId = (Date.now() + 1).toString();
     currentBotMessageId.current = botMsgId;
 
@@ -343,6 +353,10 @@ export default function LawChatBotScreen({ navigation }) {
       setIsLoading(false);
       stopTyping();
       stopThinkingAnimation();
+      // Giữ focus vào input sau khi gửi để có thể gửi tiếp
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
     }
   }, [inputText, isLoading, messages, startTyping, stopTyping, startThinkingAnimation, stopThinkingAnimation]);
 
@@ -501,14 +515,19 @@ export default function LawChatBotScreen({ navigation }) {
     );
   }, [showQuickActions, quickActionsAnim, handleQuickQuestion, isLoading]);
 
+  const ContentWrapper = Platform.OS === 'ios' ? KeyboardAvoidingView : View;
+  const wrapperProps = Platform.OS === 'ios' ? {
+    behavior: 'padding',
+    keyboardVerticalOffset: 0,
+  } : {};
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC' }} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
 
-      <KeyboardAvoidingView
-         style={{ flex: 1, justifyContent: 'space-between', width: '100%' }}
-         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 0}
+      <ContentWrapper
+        style={{ flex: 1, justifyContent: 'space-between', width: '100%' }}
+        {...wrapperProps}
       >
         {/* Header */}
         <View style={{
@@ -568,24 +587,27 @@ export default function LawChatBotScreen({ navigation }) {
         )}
 
         {/* Messages */}
-        <ScrollView
-          ref={scrollViewRef}
-          contentContainerStyle={{
-            padding: 16,
-            paddingBottom: 20 ,
-            flexGrow: 1
-          }}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {messages.map(renderMessage)}
-          {messages.length > 1 && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F59E0B10', padding: 12, borderRadius: 12, marginTop: 16, gap: 8 }}>
-              <AlertCircle size={14} color="#F59E0B" />
-              <Text style={{ fontSize: 12, color: '#64748B', flex: 1 }}>Thông tin chỉ mang tính tham khảo.</Text>
-            </View>
-          )}
-        </ScrollView>
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            ref={scrollViewRef}
+            contentContainerStyle={{
+              padding: 16,
+              paddingBottom: Platform.OS === 'android' && keyboardVisible ? 20 : 20,
+              flexGrow: 1
+            }}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+          >
+            {messages.map(renderMessage)}
+            {messages.length > 1 && (
+              <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#F59E0B10', padding: 12, borderRadius: 12, marginTop: 16, gap: 8 }}>
+                <AlertCircle size={14} color="#F59E0B" />
+                <Text style={{ fontSize: 12, color: '#64748B', flex: 1 }}>Thông tin chỉ mang tính tham khảo.</Text>
+              </View>
+            )}
+          </ScrollView>
+        </View>
 
         {renderQuickActions()}
 
@@ -594,9 +616,9 @@ export default function LawChatBotScreen({ navigation }) {
           backgroundColor: '#FFF',
           paddingHorizontal: 16,
           paddingTop: 12,
-          paddingBottom: keyboardVisible ? 12 : safeAreaInsets.bottom || 12,
+          paddingBottom: Platform.OS === 'android' && keyboardVisible ? 12 : (safeAreaInsets.bottom || 12),
           borderTopWidth: 1,
-          borderTopColor: '#E2E8F0'
+          borderTopColor: '#E2E8F0',
         }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
             <View style={{ flex: 1, backgroundColor: '#F1F5F9', borderRadius: 8, paddingHorizontal: 16, minHeight: 44, maxHeight: 120, justifyContent: 'center' }}>
@@ -610,8 +632,19 @@ export default function LawChatBotScreen({ navigation }) {
                 multiline
                 maxLength={2000}
                 returnKeyType="send"
-                onSubmitEditing={() => !shouldDisableSend && sendMessage()}
+                blurOnSubmit={false}
+                onSubmitEditing={() => {
+                  if (!shouldDisableSend) {
+                    sendMessage();
+                  }
+                }}
                 editable={!isLoading}
+                onFocus={() => {
+                  // Scroll về cuối khi focus vào input
+                  setTimeout(() => {
+                    scrollViewRef.current?.scrollToEnd({ animated: true });
+                  }, 300);
+                }}
               />
             </View>
             <TouchableOpacity
@@ -630,9 +663,9 @@ export default function LawChatBotScreen({ navigation }) {
               <Text style={{ fontSize: 12, color: '#2563EB', fontWeight: '500' }}>Tư vấn pháp lý AI</Text>
             </View>
             <Text style={{ fontSize: 12, color: '#94A3B8' }}>{inputText.length}/2000</Text>
+            </View>
           </View>
-        </View>
-      </KeyboardAvoidingView>
+      </ContentWrapper>
     </SafeAreaView>
   );
 }
