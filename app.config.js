@@ -6,7 +6,7 @@ export default {
     slug: "vien-kiem-sat-ai",
     version: "1.0.6", // ⚡ tăng khi build bản mới
     orientation: "portrait",
-    icon: "./assets/icon_vks.jpg",
+    icon: "./assets/icon_vks.png",
     userInterfaceStyle: "light",
     newArchEnabled: true,
 
@@ -41,6 +41,7 @@ export default {
         // foregroundImage: "./assets/splash-icon_vks.png",
         backgroundColor: "#006cda",
       },
+      softwareKeyboardLayoutMode: "adjustResize", // Đảm bảo keyboard không che input
     },
 
     web: {
